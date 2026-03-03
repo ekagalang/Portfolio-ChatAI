@@ -1,26 +1,141 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@variant dark (&:where(.dark, .dark *));
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+@theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-surface: hsl(var(--surface));
+  --color-surface-2: hsl(var(--surface-2));
+  --color-border: hsl(var(--border));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent-glow: hsl(var(--accent-glow));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --animate-fade-up: fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-fade-in: fade-in 0.3s ease forwards;
+  --animate-blink: blink 1.1s step-end infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-pulse-soft: pulse-soft 3s ease-in-out infinite;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% center; }
+    to   { background-position: 200% center; }
+  }
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 0.6; }
+    50%       { opacity: 1; }
   }
 }
 
+/* ── Dark Mode (default) ── */
+:root {
+  --background: 220 16% 7%;
+  --foreground: 200 15% 88%;
+  --surface: 220 14% 11%;
+  --surface-2: 220 13% 15%;
+  --border: 220 12% 18%;
+  --accent: 152 69% 52%;
+  --accent-foreground: 220 16% 7%;
+  --accent-glow: 152 69% 52% / 0.15;
+  --muted: 220 13% 14%;
+  --muted-foreground: 220 10% 48%;
+}
+
+/* ── Light Mode ── */
+.light {
+  --background: 60 9% 97%;
+  --foreground: 220 16% 12%;
+  --surface: 0 0% 100%;
+  --surface-2: 220 14% 95%;
+  --border: 220 13% 87%;
+  --accent: 152 60% 36%;
+  --accent-foreground: 0 0% 100%;
+  --accent-glow: 152 60% 36% / 0.1;
+  --muted: 220 13% 93%;
+  --muted-foreground: 220 10% 46%;
+}
+
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-geist-sans), sans-serif;
+  transition: background-color 0.4s ease, color 0.4s ease;
+  /* Subtle noise texture untuk depth */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
+
+/* ── Typing cursor ── */
+.typing-cursor::after {
+  content: "█";
+  font-size: 0.75em;
+  animation: blink 1.1s step-end infinite;
+  color: hsl(var(--accent));
+  margin-left: 1px;
+}
+
+/* ── Accent glow utility ── */
+.glow-accent {
+  box-shadow: 0 0 20px hsl(var(--accent-glow)), 0 0 40px hsl(var(--accent-glow));
+}
+
+/* ── Gradient text ── */
+.gradient-text {
+  background: linear-gradient(135deg, hsl(var(--foreground)) 0%, hsl(var(--accent)) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Scanline overlay (subtle, hanya dark mode) ── */
+.scanlines::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
 }
