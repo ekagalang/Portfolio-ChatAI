@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { geminiModel } from "@/lib/gemini";
+import { getGeminiModel } from "@/lib/gemini";
 import { buildSystemPrompt } from "@/lib/system-prompt";
 import { ChatHistory } from "@/types/chat";
 
@@ -62,6 +62,7 @@ export async function POST(req: NextRequest) {
 
     // ─── Build System Prompt ───
     const systemPrompt = buildSystemPrompt();
+    const geminiModel = getGeminiModel();
 
     // ─── Start Chat dengan History ───
     // Gemini menggunakan model "model" bukan "assistant"

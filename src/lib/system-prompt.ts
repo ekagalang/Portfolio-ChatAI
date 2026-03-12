@@ -67,7 +67,7 @@ ${profile.education.map((e) => `- ${e.degree} di ${e.institution} (${e.period})`
 ═══════════════════════════════════
 SKILL & TECH STACK
 ═══════════════════════════════════
-  ${skillsFlat}
+${skillsFlat}
 
 ═══════════════════════════════════
 PROJECT UNGGULAN

@@ -1,5 +1,6 @@
 "use client";
 
+import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -10,6 +11,132 @@ interface Props {
   index: number;
 }
 
+// Split teks jadi array kata dengan spasi
+function splitIntoWords(text: string): string[] {
+  return text.split(/(\s+)/).filter(Boolean);
+}
+
+// Komponen untuk render teks AI dengan fade-in per kata
+function AnimatedText({
+  content,
+  isStreaming,
+}: {
+  content: string;
+  isStreaming?: boolean;
+}) {
+  const words = useMemo(() => splitIntoWords(content), [content]);
+
+  if (!isStreaming) {
+    // Sudah selesai streaming — render markdown biasa tanpa animasi
+    return (
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          p: ({ children }) => (
+            <p style={{ margin: "0 0 8px", lineHeight: 1.7, lastChild: { marginBottom: 0 } } as React.CSSProperties}>
+              {children}
+            </p>
+          ),
+          code: ({ inline, children, ...props }: { inline?: boolean; children?: React.ReactNode }) =>
+            inline ? (
+              <code
+                {...props}
+                style={{
+                  padding: "1px 6px", borderRadius: "4px",
+                  background: "hsl(var(--surface-2))",
+                  border: "1px solid hsl(var(--border))",
+                  fontSize: "12px", fontFamily: "var(--font-geist-mono)",
+                  color: "hsl(var(--accent))",
+                }}
+              >
+                {children}
+              </code>
+            ) : (
+              <code
+                {...props}
+                style={{
+                  display: "block", padding: "12px 14px", borderRadius: "8px",
+                  background: "hsl(var(--surface-2))",
+                  border: "1px solid hsl(var(--border))",
+                  fontSize: "12px", fontFamily: "var(--font-geist-mono)",
+                  overflowX: "auto", lineHeight: 1.6,
+                }}
+              >
+                {children}
+              </code>
+            ),
+          pre: ({ children }) => (
+            <pre style={{ margin: "8px 0", borderRadius: "8px", overflow: "hidden" }}>
+              {children}
+            </pre>
+          ),
+          ul: ({ children }) => (
+            <ul style={{ paddingLeft: "16px", margin: "4px 0" }}>{children}</ul>
+          ),
+          ol: ({ children }) => (
+            <ol style={{ paddingLeft: "16px", margin: "4px 0" }}>{children}</ol>
+          ),
+          li: ({ children }) => (
+            <li style={{ margin: "2px 0", lineHeight: 1.6 }}>{children}</li>
+          ),
+          strong: ({ children }) => (
+            <strong style={{ color: "hsl(var(--foreground))", fontWeight: 600 }}>
+              {children}
+            </strong>
+          ),
+          a: ({ children, href }) => (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "hsl(var(--accent))", textDecoration: "underline" }}
+            >
+              {children}
+            </a>
+          ),
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    );
+  }
+
+  // Sedang streaming — render kata per kata dengan fade in
+  return (
+    <span style={{ lineHeight: 1.7 }}>
+      {words.map((word, i) => (
+        <motion.span
+          key={`${i}-${word}`}
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            duration: 0.2,
+            ease: "easeOut",
+            // Delay per kata — makin belakang makin cepat biar tidak lag
+            delay: Math.min(i * 0.015, 0.3),
+          }}
+          style={{ display: "inline" }}
+        >
+          {word}
+        </motion.span>
+      ))}
+      {/* Blinking cursor saat streaming */}
+      <motion.span
+        animate={{ opacity: [1, 0, 1] }}
+        transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
+        style={{
+          display: "inline-block",
+          width: "2px", height: "14px",
+          background: "hsl(var(--accent))",
+          marginLeft: "2px",
+          verticalAlign: "middle",
+          borderRadius: "1px",
+        }}
+      />
+    </span>
+  );
+}
+
 export function ChatMessage({ message, index }: Props) {
   const isUser = message.role === "user";
 
@@ -17,99 +144,57 @@ export function ChatMessage({ message, index }: Props) {
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1], delay: index === 0 ? 0 : 0 }}
+      transition={{
+        duration: 0.3,
+        ease: [0.16, 1, 0.3, 1],
+        delay: index === 0 ? 0.1 : 0,
+      }}
       style={{
         display: "flex",
         justifyContent: isUser ? "flex-end" : "flex-start",
         padding: "6px 16px",
-        gap: "10px",
-        alignItems: "flex-end",
       }}
     >
-      {/* AI Avatar */}
+      {/* AI avatar */}
       {!isUser && (
         <div style={{
-          width: "28px", height: "28px", borderRadius: "8px", flexShrink: 0,
-          background: "hsl(var(--surface-2))",
+          width: "24px", height: "24px", borderRadius: "6px",
+          background: "hsl(var(--accent) / 0.15)",
           border: "1px solid hsl(var(--accent) / 0.3)",
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: "11px", fontWeight: 700,
-          color: "hsl(var(--accent))",
-          fontFamily: "var(--font-geist-mono)",
-          boxShadow: "0 0 8px hsl(var(--accent) / 0.15)",
+          flexShrink: 0, marginRight: "8px", marginTop: "2px",
+          fontSize: "10px",
         }}>
-          AI
+          ⚡
         </div>
       )}
 
       {/* Bubble */}
       <div style={{
-        maxWidth: "72%",
-        padding: "10px 14px",
-        borderRadius: isUser ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-        fontSize: "13.5px",
-        lineHeight: 1.65,
-        ...(isUser ? {
-          background: "hsl(var(--accent))",
-          color: "hsl(var(--accent-foreground))",
-          fontFamily: "var(--font-geist-sans)",
-        } : {
-          background: "hsl(var(--surface))",
-          border: "1px solid hsl(var(--border))",
-          color: "hsl(var(--foreground))",
-        }),
+        maxWidth: "82%",
+        padding: isUser ? "8px 14px" : "10px 14px",
+        borderRadius: isUser ? "12px 12px 4px 12px" : "12px 12px 12px 4px",
+        background: isUser
+          ? "hsl(var(--accent))"
+          : "hsl(var(--surface))",
+        border: isUser
+          ? "none"
+          : "1px solid hsl(var(--border))",
+        color: isUser
+          ? "hsl(var(--accent-foreground))"
+          : "hsl(var(--foreground))",
+        fontSize: "13px",
+        lineHeight: 1.7,
       }}>
         {isUser ? (
-          <p style={{ whiteSpace: "pre-wrap", margin: 0 }}>{message.content}</p>
+          <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>{message.content}</p>
         ) : (
-          <div style={{ fontFamily: "var(--font-geist-sans)" }}>
-            {message.content ? (
-              <div className={`prose prose-sm dark:prose-invert max-w-none
-                prose-p:my-1 prose-p:leading-relaxed
-                prose-ul:my-1 prose-ol:my-1 prose-li:my-0.5
-                prose-headings:my-2 prose-headings:font-semibold
-                prose-code:text-[hsl(var(--accent))] prose-code:bg-[hsl(var(--surface-2))]
-                prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-xs
-                prose-pre:bg-[hsl(var(--surface-2))] prose-pre:border prose-pre:border-[hsl(var(--border))]
-                prose-strong:text-[hsl(var(--foreground))]
-                prose-a:text-[hsl(var(--accent))] prose-a:no-underline hover:prose-a:underline
-              `}>
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {message.content}
-                </ReactMarkdown>
-              </div>
-            ) : (
-              <span className="typing-cursor" style={{ color: "hsl(var(--muted-foreground))" }}>&nbsp;</span>
-            )}
-            {message.isStreaming && message.content && (
-              <span className="typing-cursor" />
-            )}
-          </div>
+          <AnimatedText
+            content={message.content}
+            isStreaming={message.isStreaming}
+          />
         )}
-
-        {/* Time */}
-        <p style={{
-          fontSize: "10px", marginTop: "4px",
-          color: isUser ? "hsl(var(--accent-foreground) / 0.6)" : "hsl(var(--muted-foreground))",
-          textAlign: isUser ? "right" : "left",
-          fontFamily: "var(--font-geist-mono)",
-        }}>
-          {message.timestamp.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })}
-        </p>
       </div>
-
-      {/* User avatar */}
-      {isUser && (
-        <div style={{
-          width: "28px", height: "28px", borderRadius: "8px", flexShrink: 0,
-          background: "hsl(var(--surface-2))",
-          border: "1px solid hsl(var(--border))",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: "13px",
-        }}>
-          👤
-        </div>
-      )}
     </motion.div>
   );
 }
