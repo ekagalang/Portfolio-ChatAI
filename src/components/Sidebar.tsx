@@ -113,7 +113,7 @@ export function Sidebar({
               <AnimatePresence>
                 {!collapsed && (
                   <motion.span
-                    initial={{ opacity: 0, x: -6 }}
+                    initial={false}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -6 }}
                     transition={{ duration: 0.2 }}
@@ -146,7 +146,7 @@ export function Sidebar({
       <AnimatePresence>
         {!collapsed && activeView === "chat" && (
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={false}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column", minHeight: 0 }}
@@ -262,7 +262,7 @@ export function Sidebar({
           <AnimatePresence>
             {!collapsed && (
               <motion.span
-                initial={{ opacity: 0, x: -6 }}
+                initial={false}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
@@ -300,7 +300,7 @@ export function Sidebar({
           <AnimatePresence>
             {!collapsed && (
               <motion.span
-                initial={{ opacity: 0, x: -6 }}
+                initial={false}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}

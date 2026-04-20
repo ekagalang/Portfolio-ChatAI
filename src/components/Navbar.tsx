@@ -43,7 +43,7 @@ export function Navbar({ language, onCVOpen, onLanguageToggle }: Props) {
 
   return (
     <motion.header
-      initial={{ opacity: 0, y: -16 }}
+      initial={false}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       style={{

@@ -67,7 +67,7 @@ export function ChatWindow({ language, externalMessages, onMessagesChange }: Pro
       <AnimatePresence>
         {!isEmpty && (
           <motion.div
-            initial={{ opacity: 0, y: -8 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
@@ -130,7 +130,7 @@ export function ChatWindow({ language, externalMessages, onMessagesChange }: Pro
           {isEmpty && (
             <motion.div
               key="welcome"
-              initial={{ opacity: 0, y: 24 }}
+              initial={false}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.97 }}
               transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
@@ -142,7 +142,7 @@ export function ChatWindow({ language, externalMessages, onMessagesChange }: Pro
               }}
             >
               <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
+                initial={false}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 style={{
@@ -157,7 +157,7 @@ export function ChatWindow({ language, externalMessages, onMessagesChange }: Pro
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0, y: 8 }}
+                initial={false}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.4 }}
               >
@@ -179,14 +179,14 @@ export function ChatWindow({ language, externalMessages, onMessagesChange }: Pro
                 </h1>
                 <p style={{
                   fontSize: "13px", color: "hsl(var(--muted-foreground))",
-                  maxWidth: "380px", lineHeight: 1.6,
+                  maxWidth: "380px", lineHeight: 1.6, margin: "0 auto",
                 }}>
                   {profile.tagline}
                 </p>
               </motion.div>
 
               <motion.div
-                initial={{ scaleX: 0, opacity: 0 }}
+                initial={false}
                 animate={{ scaleX: 1, opacity: 1 }}
                 transition={{ delay: 0.35, duration: 0.5 }}
                 style={{
@@ -205,7 +205,7 @@ export function ChatWindow({ language, externalMessages, onMessagesChange }: Pro
 
         {error && (
           <motion.div
-            initial={{ opacity: 0, y: 4 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             style={{
               display: "flex", alignItems: "center", gap: "8px",
@@ -227,7 +227,7 @@ export function ChatWindow({ language, externalMessages, onMessagesChange }: Pro
       <AnimatePresence>
         {isEmpty && (
           <motion.div
-            initial={{ opacity: 0, y: 8 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={{ delay: 0.4, duration: 0.3 }}
@@ -241,7 +241,7 @@ export function ChatWindow({ language, externalMessages, onMessagesChange }: Pro
       <AnimatePresence>
         {!isEmpty && !isLoading && (suggestions.length > 0 || loadingSuggestions) && (
           <motion.div
-            initial={{ opacity: 0 }}
+            initial={false}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >

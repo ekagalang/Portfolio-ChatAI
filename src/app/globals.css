@@ -62,16 +62,16 @@
 
 /* ── Light Mode ── */
 .light {
-  --background: 60 9% 97%;
-  --foreground: 220 16% 12%;
-  --surface: 0 0% 100%;
-  --surface-2: 220 14% 95%;
-  --border: 220 13% 87%;
-  --accent: 152 60% 36%;
+  --background: 42 28% 96%;
+  --foreground: 224 24% 14%;
+  --surface: 0 0% 99%;
+  --surface-2: 42 20% 92%;
+  --border: 220 18% 79%;
+  --accent: 160 78% 28%;
   --accent-foreground: 0 0% 100%;
-  --accent-glow: 152 60% 36% / 0.1;
-  --muted: 220 13% 93%;
-  --muted-foreground: 220 10% 46%;
+  --accent-glow: 160 78% 28% / 0.14;
+  --muted: 42 18% 91%;
+  --muted-foreground: 220 12% 34%;
 }
 
 /* ── Reset ── */
@@ -94,6 +94,13 @@ body {
   transition: background-color 0.4s ease, color 0.4s ease;
   /* Subtle noise texture untuk depth */
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+.light body {
+  background-image:
+    radial-gradient(circle at top, hsl(160 42% 92%) 0%, transparent 34%),
+    linear-gradient(180deg, hsl(42 28% 97%), hsl(42 20% 94%)),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
 }
 
 /* ── Scrollbar ── */

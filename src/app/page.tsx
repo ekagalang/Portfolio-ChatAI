@@ -102,11 +102,11 @@ export default function Home() {
             display: "flex", flexDirection: "column",
             minWidth: 0,
           }}>
-            <AnimatePresence mode="wait">
+            <AnimatePresence initial={false} mode="wait">
               {activeView === "chat" && (
                 <motion.div
                   key="chat"
-                  initial={{ opacity: 0 }}
+                  initial={false}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.15 }}
@@ -130,7 +130,7 @@ export default function Home() {
               {activeView === "projects" && (
                 <motion.div
                   key="projects"
-                  initial={{ opacity: 0 }}
+                  initial={false}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.15 }}
@@ -147,7 +147,7 @@ export default function Home() {
               {activeView === "services" && (
                 <motion.div
                   key="services"
-                  initial={{ opacity: 0 }}
+                  initial={false}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.15 }}
@@ -164,7 +164,7 @@ export default function Home() {
               {activeView === "contact" && (
                 <motion.div
                   key="contact"
-                  initial={{ opacity: 0 }}
+                  initial={false}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.15 }}

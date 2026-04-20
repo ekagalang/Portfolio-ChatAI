@@ -5,6 +5,20 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
 const BASE_URL = "https://ekagalang.my.id";
+const THEME_INIT_SCRIPT = `
+(() => {
+  const storageKey = "portfolio-theme";
+  try {
+    const stored = localStorage.getItem(storageKey);
+    const theme = stored === "light" || stored === "dark" ? stored : "light";
+    document.documentElement.classList.remove("light", "dark");
+    document.documentElement.classList.add(theme);
+  } catch {
+    document.documentElement.classList.remove("light", "dark");
+    document.documentElement.classList.add("light");
+  }
+})();
+`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -115,6 +129,7 @@ export default function RootLayout({
   return (
     <html lang="id" className="light" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         {umamiId && umamiUrl && (
           <script
             defer

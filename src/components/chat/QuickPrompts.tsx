@@ -39,7 +39,7 @@ export function QuickPrompts({ onSelect, disabled, language }: Props) {
         {prompts.map((item, i) => (
           <motion.button
             key={item.label}
-            initial={{ opacity: 0, y: 6 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 * i, duration: 0.25 }}
             onClick={() => onSelect(item.prompt)}
