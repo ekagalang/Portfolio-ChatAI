@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { getGeminiModel, withGeminiModelFallback } from "@/lib/gemini";
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,16 +8,6 @@ export async function POST(req: NextRequest) {
     if (!lastMessage || !lastResponse) {
       return NextResponse.json({ suggestions: [] });
     }
-
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (!apiKey) {
-      console.error("GEMINI_API_KEY tidak ada di environment");
-      return NextResponse.json({ suggestions: [] });
-    }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = language === "id"
       ? `Berdasarkan percakapan ini:
@@ -47,7 +37,9 @@ Questions must be:
 Reply ONLY with a JSON array, no explanation, no markdown:
 ["question 1", "question 2", "question 3"]`;
 
-    const result   = await model.generateContent(prompt);
+    const { result } = await withGeminiModelFallback((selectedModel) =>
+      getGeminiModel(selectedModel).generateContent(prompt)
+    );
     const text     = result.response.text().trim();
 
     // Parse JSON — strip backticks kalau ada

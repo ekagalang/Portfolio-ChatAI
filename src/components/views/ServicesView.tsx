@@ -83,13 +83,13 @@ export function ServicesView({ language }: Props) {
               }}>
                 <div>
                   <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--accent))", margin: 0, fontFamily: "var(--font-geist-mono)" }}>
-                    {formatIDR(service.pricing.starting)}
+                    Mulai dari {formatIDR(service.pricing.starting)}
                     <span style={{ fontSize: "11px", fontWeight: 400, color: "hsl(var(--muted-foreground))" }}>
                       /{service.pricing.unit}
                     </span>
                   </p>
                   <p style={{ fontSize: "10px", color: "hsl(var(--muted-foreground))", margin: "2px 0 0", fontFamily: "var(--font-geist-mono)" }}>
-                    ⏱ {service.duration}
+                    ⏱ {service.duration} | {service.pricing.note}
                   </p>
                 </div>
                 <a

@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getGeminiModel } from "@/lib/gemini";
+import {
+  getGeminiModel,
+  isRetryableGeminiError,
+  withGeminiModelFallback,
+} from "@/lib/gemini";
 import { buildSystemPrompt } from "@/lib/system-prompt";
 import { ChatHistory } from "@/types/chat";
 
@@ -23,6 +27,47 @@ function checkRateLimit(ip: string): boolean {
 
   record.count++;
   return true;
+}
+
+function buildChatHistory(history: ChatHistory[], systemPrompt: string): ChatHistory[] {
+  return [
+    {
+      role: "user",
+      parts: [{ text: systemPrompt }],
+    },
+    {
+      role: "model",
+      parts: [
+        {
+          text: `Siap! Saya adalah AI asisten personal. Saya akan membantu visitor mengenal pemilik portfolio ini. Silakan mulai bertanya!`,
+        },
+      ],
+    },
+    ...history,
+  ];
+}
+
+function splitTextIntoChunks(text: string, chunkSize = 48) {
+  const words = text.split(/\s+/).filter(Boolean);
+  const chunks: string[] = [];
+  let current = "";
+
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (candidate.length > chunkSize && current) {
+      chunks.push(`${current} `);
+      current = word;
+      continue;
+    }
+
+    current = candidate;
+  }
+
+  if (current) {
+    chunks.push(current);
+  }
+
+  return chunks.length > 0 ? chunks : [text];
 }
 
 export async function POST(req: NextRequest) {
@@ -62,48 +107,36 @@ export async function POST(req: NextRequest) {
 
     // ─── Build System Prompt ───
     const systemPrompt = buildSystemPrompt();
-    const geminiModel = getGeminiModel();
-
-    // ─── Start Chat dengan History ───
-    // Gemini menggunakan model "model" bukan "assistant"
-    const chat = geminiModel.startChat({
-      history: [
-        // Inject system prompt sebagai pesan pertama
-        // Ini trik agar Gemini "tahu" tentang pemilik portfolio
-        {
-          role: "user",
-          parts: [{ text: systemPrompt }],
-        },
-        {
-          role: "model",
-          parts: [
-            {
-              text: `Siap! Saya adalah AI asisten personal. Saya akan membantu visitor mengenal pemilik portfolio ini. Silakan mulai bertanya!`,
-            },
-          ],
-        },
-        // Inject conversation history sebelumnya
-        ...history,
-      ],
+    const geminiHistory = buildChatHistory(history, systemPrompt);
+    const { result, modelName } = await withGeminiModelFallback(async (selectedModel) => {
+      const chat = getGeminiModel(selectedModel).startChat({ history: geminiHistory });
+      return chat.sendMessage(message);
     });
+    const fullText = result.response.text().trim();
 
-    // ─── Send Message & Stream Response ───
-    const result = await chat.sendMessageStream(message);
+    if (modelName !== "gemini-2.5-flash") {
+      console.warn(`Chat API fallback model in use: ${modelName}`);
+    }
+
+    if (!fullText) {
+      return NextResponse.json(
+        { error: "AI tidak mengembalikan respons." },
+        { status: 502 }
+      );
+    }
 
     // Streaming response agar terasa real-time seperti ChatGPT/Claude
     const stream = new ReadableStream({
       async start(controller) {
         const encoder = new TextEncoder();
         try {
-          for await (const chunk of result.stream) {
-            const text = chunk.text();
-            if (text) {
-              // Format: "data: <text>\n\n" — Server-Sent Events standard
-              controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify({ text })}\n\n`)
-              );
-            }
+          for (const text of splitTextIntoChunks(fullText)) {
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({ text })}\n\n`)
+            );
+            await new Promise((resolve) => setTimeout(resolve, 18));
           }
+
           // Signal bahwa stream selesai
           controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
         } catch (streamError) {
@@ -128,6 +161,17 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error("Chat API error:", error);
+
+    if (isRetryableGeminiError(error)) {
+      return NextResponse.json(
+        {
+          error:
+            "AI sedang sibuk karena traffic tinggi. Coba lagi beberapa saat lagi.",
+        },
+        { status: 503 }
+      );
+    }
+
     return NextResponse.json(
       { error: "Terjadi kesalahan. Coba lagi." },
       { status: 500 }

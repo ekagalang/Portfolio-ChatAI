@@ -7,7 +7,7 @@ export const services = [
     title: "Web App Fullstack",
     description:
       "Pembuatan aplikasi web lengkap dari backend hingga frontend. Cocok untuk sistem internal, SaaS, atau platform bisnis.",
-    stack: ["Laravel", "Next.js", "Vue.JS", "React", "Node.JS", "Express.JS", "MySQL", "PostgreSQL", "MongoDB", "Redis", "Prisma", "Docker"],
+    stack: ["Laravel", "Next.js", "Vue.JS", "React", "Node.JS", "Express.JS", "Golang", "Python", "MySQL", "PostgreSQL", "MongoDB", "Redis", "Prisma", "Docker"],
     deliverables: [
       "Source code lengkap",
       "Dokumentasi API",
@@ -17,7 +17,7 @@ export const services = [
     pricing: {
       starting: 500000,
       unit: "project",
-      note: "Harga final tergantung kompleksitas fitur",
+      note: "Harga final tergantung kompleksitas fitur, Revisi 3x",
     },
     duration: "1 — 8 minggu",
   },
@@ -27,7 +27,7 @@ export const services = [
     title: "Mobile App",
     description:
       "Aplikasi mobile Android. Terintegrasi dengan REST API backend.",
-    stack: ["Kotlin", "Dart", "React Native", "Flutter", "MySQL", "PostgreSQL", "MongoDB"],
+    stack: ["Kotlin", "Flutter", "React Native", "MySQL", "PostgreSQL", "MongoDB"],
     deliverables: [
       "APK & IPA build",
       "Source code",
@@ -36,7 +36,7 @@ export const services = [
     pricing: {
       starting: 500000,
       unit: "project",
-      note: "Harga final tergantung jumlah screen dan fitur",
+      note: "Harga final tergantung kompleksitas fitur, Revisi 3x",
     },
     duration: "1 — 8 minggu",
   },
@@ -56,7 +56,7 @@ export const services = [
     pricing: {
       starting: 150000,
       unit: "project",
-      note: "Termasuk revisi hingga 3x",
+      note: "Harga final tergantung kompleksitas fitur, Revisi 3x",
     },
     duration: "3 — 14 hari",
   },
@@ -76,7 +76,7 @@ export const services = [
     pricing: {
       starting: 300000,
       unit: "project",
-      note: "Harga per modul tersedia",
+      note: "Harga final tergantung kompleksitas fitur, Revisi 3x",
     },
     duration: "1 — 4 minggu",
   },

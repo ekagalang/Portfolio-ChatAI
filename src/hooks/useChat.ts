@@ -162,6 +162,7 @@ export function useChat({ language, externalMessages, onMessagesChange }: UseCha
         const reader  = res.body?.getReader();
         const decoder = new TextDecoder();
         let accumulatedText = "";
+        let pendingBuffer = "";
 
         if (!reader) throw new Error("Stream tidak tersedia.");
 
@@ -169,25 +170,47 @@ export function useChat({ language, externalMessages, onMessagesChange }: UseCha
           const { done, value } = await reader.read();
           if (done) break;
 
-          const chunk = decoder.decode(value, { stream: true });
-          const lines = chunk.split("\n");
+          pendingBuffer += decoder.decode(value, { stream: true });
+          const events = pendingBuffer.split("\n\n");
+          pendingBuffer = events.pop() ?? "";
 
-          for (const line of lines) {
-            if (!line.startsWith("data: ")) continue;
+          for (const event of events) {
+            const line = event
+              .split("\n")
+              .find((entry) => entry.startsWith("data: "));
+
+            if (!line) continue;
+
             const data = line.slice(6);
-            if (data === "[DONE]") break;
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.text) {
-                accumulatedText += parsed.text;
-                onMessagesChange([
-                  ...updatedMessages,
-                  { ...assistantMessage, content: accumulatedText },
-                ]);
-                scrollToBottom();
-              }
-              if (parsed.error) throw new Error(parsed.error);
-            } catch { /* skip */ }
+            if (data === "[DONE]") continue;
+
+            const parsed = JSON.parse(data);
+            if (parsed.error) {
+              throw new Error(parsed.error);
+            }
+
+            if (parsed.text) {
+              accumulatedText += parsed.text;
+              onMessagesChange([
+                ...updatedMessages,
+                { ...assistantMessage, content: accumulatedText },
+              ]);
+              scrollToBottom();
+            }
+          }
+        }
+
+        if (pendingBuffer.trim().startsWith("data: ")) {
+          const data = pendingBuffer.trim().slice(6);
+          if (data !== "[DONE]") {
+            const parsed = JSON.parse(data);
+            if (parsed.error) {
+              throw new Error(parsed.error);
+            }
+
+            if (parsed.text) {
+              accumulatedText += parsed.text;
+            }
           }
         }
 

@@ -8,6 +8,8 @@ services:
         NEXT_PUBLIC_UMAMI_URL: ${NEXT_PUBLIC_UMAMI_URL:-}
     container_name: main_apps
     restart: always
+    env_file:
+      - .env.production
     environment:
       NODE_ENV: production
       HOSTNAME: 0.0.0.0
@@ -32,3 +34,7 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+networks:
+  frontend:
+    external: true
