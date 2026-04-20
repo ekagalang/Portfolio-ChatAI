@@ -1,0 +1,1 @@
+TypeScript + App Router codebase. Root layout imports `src/app/globals.css`. Styling uses Tailwind CSS v4 and many inline styles with CSS variables defined in globals.css. Config files use ESM/TS syntax. Components appear to rely on CSS custom properties like `--background`, `--border`, and Geist font variables, so missing global CSS causes the UI to look mostly unstyled.

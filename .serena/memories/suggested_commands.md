@@ -1,0 +1,1 @@
+Windows/PowerShell commands: `npm.cmd run dev` to start local dev server, `npm.cmd run build` for production build, `npm.cmd run start` to run Next production server, `docker compose --env-file .env.production up -d --build` for documented production deployment, `eslint` via `npx eslint .` or project lint script `npm.cmd run lint`.

@@ -1,0 +1,1 @@
+After changes, at minimum run `npm.cmd run build` to verify production compilation. For deployment-related changes, also verify the production server serves `/_next/static/*` assets (especially CSS chunks) and that `public` assets are available.
