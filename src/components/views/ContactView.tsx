@@ -7,6 +7,7 @@ import {
   Mail, CheckCircle2, Loader2, AlertCircle,
 } from "lucide-react";
 import { profile } from "@/data/profile";
+import { LegalAccordion } from "@/components/LegalAccordion";
 
 interface Props {
   language: "id" | "en";
@@ -330,6 +331,8 @@ export function ContactView({ language }: Props) {
             </a>
           ))}
         </div>
+
+        <LegalAccordion language={language} />
 
       </motion.div>
     </div>
