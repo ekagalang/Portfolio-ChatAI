@@ -1,8 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ExternalLink } from "lucide-react";
+
+const PAGE_LINKS: Record<string, string> = {
+  faq:    "/faq",
+  tos:    "/terms",
+  refund: "/refund",
+};
 
 interface AccordionItem {
   id: string;
@@ -62,6 +69,25 @@ function AccordionSection({ item, isOpen, onToggle }: {
               paddingTop: "12px",
             }}>
               {item.content}
+
+              {PAGE_LINKS[item.id] && (
+                <div style={{ marginTop: "14px", paddingTop: "10px", borderTop: "1px solid hsl(var(--border))" }}>
+                  <Link
+                    href={PAGE_LINKS[item.id]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: "5px",
+                      fontSize: "11px", color: "hsl(var(--accent))",
+                      fontFamily: "var(--font-geist-mono)",
+                      textDecoration: "none",
+                    }}
+                  >
+                    <ExternalLink size={11} />
+                    Buka halaman penuh
+                  </Link>
+                </div>
+              )}
             </div>
           </motion.div>
         )}
