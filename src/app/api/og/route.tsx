@@ -1,4 +1,3 @@
-import { label } from "framer-motion/client";
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
@@ -160,7 +159,7 @@ export async function GET() {
               letterSpacing: "0.1em",
             }}
           >
-            &gt;_ AI Portfolio Assistant
+            &gt;_ Turning Complex Challenges into Robust Digital Innovations.
           </span>
 
           {/* Nama */}
@@ -228,42 +227,33 @@ export async function GET() {
             zIndex: 1,
           }}
         >
-          {/* Stack badges */}
-          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          {/* Stack badges — dibatasi 10 item, tanpa wrap agar CTA tidak terpotong */}
+          <div style={{ display: "flex", gap: "8px", flex: 1, overflow: "hidden" }}>
             {[
-              { label: "Laravel",      color: "#ef4444", bg: "#fef2f2", border: "#fecaca" },
-              { label: "Next.js",      color: "#111827", bg: "#f9fafb", border: "#e5e7eb" },
-              { label: "Vue.js",       color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
-              { label: "React",        color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" },
-              { label: "Node.js",      color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
-              { label: "Express.js",   color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
-              { label: "Kotlin",       color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
-              { label: "Golang",       color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
-              { label: "TypeScript",   color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" },
-              { label: "JavaScript",   color: "#f59e0b", bg: "#fffbeb", border: "#fef3c7" },
-              { label: "Python",       color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
-              { label: "Tailwind CSS", color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
-              { label: "Bootstrap",    color: "#712cf9", bg: "#f5f3ff", border: "#ddd6fe" },
-              { label: "Nginx",        color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
-              { label: "VPS",          color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
-              { label: "Docker",       color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
-              { label: "MySQL",        color: "#ea580c", bg: "#fff7ed", border: "#fed7aa" },
-              { label: "PostgreSQL",   color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
-              { label: "MongoDB",      color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
-              { label: "Prisma",       color: "#ef4444", bg: "#fef2f2", border: "#fecaca" },
+              { label: "Laravel",    color: "#ef4444", bg: "#fef2f2", border: "#fecaca" },
+              { label: "Next.js",    color: "#111827", bg: "#f9fafb", border: "#e5e7eb" },
+              { label: "React",      color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" },
+              { label: "Node.js",    color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
+              { label: "Kotlin",     color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
+              { label: "Golang",     color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
+              { label: "TypeScript", color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" },
+              { label: "Docker",     color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
+              { label: "MySQL",      color: "#ea580c", bg: "#fff7ed", border: "#fed7aa" },
+              { label: "PostgreSQL", color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
             ].map((tech) => (
               <div
                 key={tech.label}
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  padding: "6px 14px",
+                  padding: "6px 12px",
                   borderRadius: "6px",
                   background: tech.bg,
                   border: `1px solid ${tech.border}`,
                   fontSize: "13px",
                   fontWeight: 600,
                   color: tech.color,
+                  flexShrink: 0,
                 }}
               >
                 {tech.label}
@@ -271,13 +261,15 @@ export async function GET() {
             ))}
           </div>
 
-          {/* Right: CTA */}
+          {/* Right: CTA — flexShrink: 0 agar selalu tampil */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
               alignItems: "flex-end",
               gap: "4px",
+              flexShrink: 0,
+              marginLeft: "16px",
             }}
           >
             <span style={{ fontSize: "13px", color: "#9ca3af" }}>
