@@ -6,6 +6,7 @@ import {
   Send, Github, Linkedin, MessageCircle,
   Mail, CheckCircle2, Loader2, AlertCircle,
 } from "lucide-react";
+import Link from "next/link";
 import { profile } from "@/data/profile";
 import { LegalAccordion } from "@/components/LegalAccordion";
 
@@ -155,9 +156,30 @@ export function ContactView({ language }: Props) {
     <div style={{ height: "100%", overflowY: "auto", padding: "24px 20px" }}>
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
 
-        <h2 style={{ fontSize: "16px", fontWeight: 600, color: "hsl(var(--foreground))", fontFamily: "var(--font-geist-mono)", marginBottom: "4px" }}>
-          {t.title}
-        </h2>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "12px", marginBottom: "4px" }}>
+          <h2 style={{ fontSize: "16px", fontWeight: 600, color: "hsl(var(--foreground))", fontFamily: "var(--font-geist-mono)", margin: 0 }}>
+            {t.title}
+          </h2>
+          <Link
+            href="/contact"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "flex", alignItems: "center", gap: "4px",
+              fontSize: "11px", color: "hsl(var(--accent))",
+              fontFamily: "var(--font-geist-mono)",
+              textDecoration: "none", flexShrink: 0,
+              padding: "3px 8px", borderRadius: "5px",
+              border: "1px solid hsl(var(--accent) / 0.25)",
+              background: "hsl(var(--accent) / 0.06)",
+              transition: "all 0.15s ease",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "hsl(var(--accent) / 0.12)"; e.currentTarget.style.borderColor = "hsl(var(--accent) / 0.5)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "hsl(var(--accent) / 0.06)"; e.currentTarget.style.borderColor = "hsl(var(--accent) / 0.25)"; }}
+          >
+            {language === "id" ? "Halaman penuh" : "Full page"} ↗
+          </Link>
+        </div>
         <p style={{ fontSize: "12px", color: "hsl(var(--muted-foreground))", marginBottom: "24px" }}>
           {t.subtitle}
         </p>
