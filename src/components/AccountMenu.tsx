@@ -94,20 +94,18 @@ export function AccountMenu({ language }: { language: "id" | "en" }) {
               <UserRound className="size-4 shrink-0" />
               Profil
             </Link>
-            {!inDashboard && (
-              <>
+            {!inDashboard &&
+              (isAdmin ? (
+                <Link href="/admin" onClick={() => setOpen(false)} className={itemCls}>
+                  <ShieldCheck className="size-4 shrink-0" />
+                  Panel Admin
+                </Link>
+              ) : (
                 <Link href="/dashboard" onClick={() => setOpen(false)} className={itemCls}>
                   <LayoutDashboard className="size-4 shrink-0" />
                   Dashboard
                 </Link>
-                {isAdmin && (
-                  <Link href="/admin" onClick={() => setOpen(false)} className={itemCls}>
-                    <ShieldCheck className="size-4 shrink-0" />
-                    Kelola Order
-                  </Link>
-                )}
-              </>
-            )}
+              ))}
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
               className={cn(itemCls, "hover:bg-red-400/10 hover:text-red-400")}

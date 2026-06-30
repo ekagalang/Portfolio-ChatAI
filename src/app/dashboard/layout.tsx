@@ -5,5 +5,8 @@ import { DashboardShell } from "@/components/dashboard/DashboardShell";
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
   if (!user) redirect("/login");
-  return <DashboardShell user={user}>{children}</DashboardShell>;
+  // Pages di bawah /dashboard yang dipakai bersama (mis. /dashboard/profil)
+  // tetap memakai shell sesuai peran agar konsisten.
+  const variant = user.role === "admin" ? "admin" : "user";
+  return <DashboardShell variant={variant}>{children}</DashboardShell>;
 }

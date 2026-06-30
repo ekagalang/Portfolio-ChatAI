@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { requireUser } from "@/lib/session";
 import { getUserOrders } from "@/lib/orders";
@@ -13,6 +14,8 @@ const ACTIVE = ["quoted", "dp_paid", "in_progress", "awaiting_settlement"];
 
 export default async function DashboardPage() {
   const user = await requireUser();
+  // Admin punya dashboard sendiri → arahkan ke panel admin.
+  if (user.role === "admin") redirect("/admin");
   const orders = await getUserOrders(user.id);
 
   const active = orders.filter((o) => ACTIVE.includes(o.status)).length;
