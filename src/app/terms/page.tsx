@@ -16,7 +16,7 @@ export default function TermsPage() {
     <LegalPageLayout
       title="Syarat & Ketentuan"
       subtitle="Dengan memesan jasa, klien dianggap telah membaca dan menyetujui syarat berikut."
-      updatedAt="Juni 2025"
+      updatedAt="Juni 2026"
     >
       <LegalSection title="1. Memulai Proyek">
         <LegalLi>Proyek dimulai setelah DP 50% diterima dan brief proyek disepakati oleh kedua pihak.</LegalLi>
@@ -33,7 +33,7 @@ export default function TermsPage() {
       <LegalSection title="2. Pembayaran">
         <LegalLi>Struktur pembayaran: 50% DP di awal, 50% pelunasan setelah proyek selesai dan disetujui.</LegalLi>
         <LegalLi>Pelunasan wajib dilakukan sebelum source code, file desain, atau akses server diserahkan.</LegalLi>
-        <LegalLi>Keterlambatan pelunasan lebih dari 7 hari setelah proyek selesai dikenakan biaya penundaan.</LegalLi>
+        <LegalLi>Pembayaran dapat dilakukan melalui transfer bank atau metode pembayaran lain yang disepakati.</LegalLi>
       </LegalSection>
 
       <LegalSection title="3. Hak Kekayaan Intelektual">
@@ -41,12 +41,10 @@ export default function TermsPage() {
           Source code, desain, dan seluruh aset proyek menjadi milik klien sepenuhnya setelah pelunasan penuh.
         </LegalLi>
         <LegalLi>
-          Saya berhak mencantumkan proyek ini dalam portofolio dan media sosial kecuali ada perjanjian
-          kerahasiaan (NDA) yang ditandatangani sebelum proyek dimulai.
+          Saya berhak mencantumkan proyek ini dalam portofolio dan media sosial secara sensor kecuali ada perjanjian kerahasiaan (NDA) yang ditandatangani sebelum proyek dimulai.
         </LegalLi>
         <LegalLi>
-          Library dan framework open-source yang digunakan tetap tunduk pada lisensinya masing-masing
-          dan bukan bagian dari IP yang ditransfer.
+          Library dan framework open-source yang digunakan tetap tunduk pada lisensinya masing-masing dan bukan bagian dari IP yang ditransfer.
         </LegalLi>
       </LegalSection>
 
@@ -76,7 +74,7 @@ export default function TermsPage() {
           dapat menggeser timeline tanpa penalti bagi saya.
         </LegalLi>
         <LegalLi>
-          Jika klien tidak merespons selama lebih dari 14 hari kalender berturut-turut tanpa
+          Jika klien tidak merespons selama lebih dari 30 hari kalender berturut-turut tanpa
           pemberitahuan, proyek dianggap ditunda dan DP tidak dapat dikembalikan.
         </LegalLi>
         <LegalLi>

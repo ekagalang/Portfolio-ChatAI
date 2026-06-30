@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
       from: fromEmail,
       to: toEmail,
       replyTo: email.trim(),
-      subject: `[Portfolio] Pesan baru dari ${name.trim()}`,
+      subject: `Pesan baru dari ${name.trim()}`,
       html: buildEmailHTML({ name, email, message }),
     });
 
@@ -153,11 +153,8 @@ function buildEmailHTML({
               <!-- Header -->
               <tr>
                 <td style="padding:24px 28px;border-bottom:1px solid #1e2130;">
-                  <p style="margin:0;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#3bba6e;">
-                    portfolio.ai
-                  </p>
                   <h1 style="margin:6px 0 0;font-size:18px;color:#e2e8f0;font-weight:600;">
-                    📬 Pesan Baru Masuk
+                    Pesan Baru Masuk
                   </h1>
                 </td>
               </tr>
@@ -230,10 +227,10 @@ function buildAutoReplyHTML({ name }: { name: string }): string {
               <tr>
                 <td style="padding:28px;">
                   <p style="margin:0 0 4px;font-size:11px;letter-spacing:0.15em;text-transform:uppercase;color:#3bba6e;">
-                    portfolio.ai
+                    ekagalang.my.id
                   </p>
                   <h1 style="margin:6px 0 20px;font-size:18px;color:#e2e8f0;font-weight:600;">
-                    ✅ Pesan diterima, ${name}!
+                    Hallo ${name}!
                   </h1>
                   <p style="margin:0 0 12px;font-size:13px;color:#94a3b8;line-height:1.7;">
                     Terima kasih sudah menghubungi saya. Pesan kamu sudah masuk
@@ -242,6 +239,22 @@ function buildAutoReplyHTML({ name }: { name: string }): string {
                   <p style="margin:0;font-size:13px;color:#94a3b8;line-height:1.7;">
                     Kalau butuh respons lebih cepat, bisa langsung WhatsApp ya!
                   </p>
+                  <a
+                    href="https://wa.me/6285157222301"
+                    target="_blank"
+                    style="
+                      display:inline-block;
+                      background:#25D366;
+                      color:#ffffff;
+                      text-decoration:none;
+                      padding:12px 20px;
+                      border-radius:8px;
+                      font-size:13px;
+                      font-weight:600;
+                    "
+                  >
+                    💬 Chat via WhatsApp
+                  </a>
                 </td>
               </tr>
 

@@ -16,7 +16,7 @@ export default function RefundPage() {
     <LegalPageLayout
       title="Kebijakan Refund"
       subtitle="Kebijakan ini berlaku untuk semua jasa yang dibayar melalui platform ini maupun transfer langsung."
-      updatedAt="Juni 2025"
+      updatedAt="Juni 2026"
     >
       <LegalSection title="Sebelum Proyek Dimulai">
         <LegalP>

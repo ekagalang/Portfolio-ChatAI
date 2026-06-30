@@ -95,7 +95,7 @@ export function ContactPageContent() {
             }}
           >
             <CheckCircle2 size={16} style={{ flexShrink: 0, marginTop: "1px" }} />
-            <span>Pesan terkirim! Cek inbox kamu untuk konfirmasi.</span>
+            <span>Pesan terkirim! Nantikan jawaban dari saya.</span>
           </motion.div>
         )}
       </AnimatePresence>

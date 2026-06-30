@@ -217,43 +217,52 @@ export async function GET() {
           </span>
         </div>
 
-        {/* ── Bottom: Tech stack badges ── */}
+        {/* ── Bottom: Tech stack badges + CTA (column agar CTA tidak terpotong) ── */}
         <div
           style={{
             display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
+            flexDirection: "column",
+            gap: "14px",
             position: "relative",
             zIndex: 1,
           }}
         >
-          {/* Stack badges — dibatasi 10 item, tanpa wrap agar CTA tidak terpotong */}
-          <div style={{ display: "flex", gap: "8px", flex: 1, overflow: "hidden" }}>
+          {/* Stack badges — wrap bebas */}
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             {[
-              { label: "Laravel",    color: "#ef4444", bg: "#fef2f2", border: "#fecaca" },
-              { label: "Next.js",    color: "#111827", bg: "#f9fafb", border: "#e5e7eb" },
-              { label: "React",      color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" },
-              { label: "Node.js",    color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
-              { label: "Kotlin",     color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
-              { label: "Golang",     color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
-              { label: "TypeScript", color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" },
-              { label: "Docker",     color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
-              { label: "MySQL",      color: "#ea580c", bg: "#fff7ed", border: "#fed7aa" },
-              { label: "PostgreSQL", color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
+              { label: "Laravel",      color: "#ef4444", bg: "#fef2f2", border: "#fecaca" },
+              { label: "Next.js",      color: "#111827", bg: "#f9fafb", border: "#e5e7eb" },
+              { label: "Vue.js",       color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
+              { label: "React",        color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" },
+              { label: "Node.js",      color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
+              { label: "Express.js",   color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
+              { label: "Kotlin",       color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
+              { label: "Golang",       color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
+              { label: "TypeScript",   color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe" },
+              { label: "JavaScript",   color: "#f59e0b", bg: "#fffbeb", border: "#fef3c7" },
+              { label: "Python",       color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
+              { label: "Tailwind CSS", color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
+              { label: "Bootstrap",    color: "#712cf9", bg: "#f5f3ff", border: "#ddd6fe" },
+              { label: "Linux/Unix",   color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
+              { label: "VPS",          color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
+              { label: "Docker",       color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
+              { label: "MySQL",        color: "#ea580c", bg: "#fff7ed", border: "#fed7aa" },
+              { label: "PostgreSQL",   color: "#0284c7", bg: "#f0f9ff", border: "#bae6fd" },
+              { label: "MongoDB",      color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" },
+              { label: "Prisma",       color: "#ef4444", bg: "#fef2f2", border: "#fecaca" },
             ].map((tech) => (
               <div
                 key={tech.label}
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  padding: "6px 12px",
+                  padding: "5px 12px",
                   borderRadius: "6px",
                   background: tech.bg,
                   border: `1px solid ${tech.border}`,
-                  fontSize: "13px",
+                  fontSize: "12px",
                   fontWeight: 600,
                   color: tech.color,
-                  flexShrink: 0,
                 }}
               >
                 {tech.label}
@@ -261,19 +270,16 @@ export async function GET() {
             ))}
           </div>
 
-          {/* Right: CTA — flexShrink: 0 agar selalu tampil */}
+          {/* CTA — baris terpisah, selalu tampil di bawah badges */}
           <div
             style={{
               display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-end",
-              gap: "4px",
-              flexShrink: 0,
-              marginLeft: "16px",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
             <span style={{ fontSize: "13px", color: "#9ca3af" }}>
-              Hubungi saya di:
+              Hubungi saya untuk pertanyaan, konsultasi, atau proyek pengembangan web &amp; mobile.
             </span>
             <div
               style={{
@@ -286,14 +292,8 @@ export async function GET() {
                 boxShadow: "0 0 20px #4ade8044",
               }}
             >
-              <span
-                style={{
-                  fontSize: "15px",
-                  fontWeight: 700,
-                  color: "#ffffff",
-                }}
-              >
-                ekagalang.my.id →
+              <span style={{ fontSize: "15px", fontWeight: 700, color: "#ffffff" }}>
+                Call Me Now →
               </span>
             </div>
           </div>

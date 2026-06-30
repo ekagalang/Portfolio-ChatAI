@@ -97,6 +97,18 @@ export const featuredProjects: FeaturedProject[] = [
     pinned: true,
     year: 2026,
   },
+  {
+    id: "project-8",
+    title: "Go Download Manager",
+    description:
+      "A native desktop download manager built with Go and Wails v2, powered by aria2 as the download engine and React + TypeScript as the frontend. It supports multi-threaded downloads, download queue management, and a user-friendly interface for managing downloads efficiently.",
+    stack: ["Go", "Wails", "aria2", "React", "TypeScript"],
+    type: "Desktop App",
+    status: "Completed",
+    githubUrl: "https://github.com/ekagalang/GoDM",
+    pinned: true,
+    year: 2026,
+  },
   // TODO: Tambah project lainnya
 ];
 

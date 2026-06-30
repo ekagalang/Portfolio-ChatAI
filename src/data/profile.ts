@@ -28,14 +28,14 @@ export const profile = {
     {
       company: "Kanggo",
       role: "Fullstack Developer",
-      period: "2025 — Sekarang",
+      period: "Desember 2025 — Sekarang",
       description:
-        "Sebagai Fullstack Developer, saya membangun aplikasi pintar untuk melakukan perhitungan material yang complex dalam rangka mempermudah proses pekerjaan Kontraktor dan Pelaksana di lapangan.",
+        "As a Fullstack Developer, I build smart applications to perform complex material calculations in order to simplify the work processes of Contractors and Implementers in the field.",
     },
     {
       company: "BASS Training Center & Consultant",
       role: "Full Stack Developer",
-      period: "2022 — 2025",
+      period: "Februari 2022 — Desember 2025",
       description:
         "As a Fullstack Developer, I design, develop, and maintain web applications using Laravel, Next.js while managing VPS and LAMP/LEMP infrastructure to ensure system performance and scalability. I have led the migration from shared hosting to VPS, enhancing stability and security; integrated Midtrans Payment Gateway for secure online transactions; and developed web-based Learning Management System (LMS) and Inventory Management System that improved operational efficiency by over 60%. Additionally, I implemented CI/CD pipelines, optimized website performance, and configured Cloudflare DNS to strengthen speed, reliability, and overall digital security.",
     },
@@ -49,7 +49,7 @@ export const profile = {
     {
       company: "LSP Fasilitator Instruktur dan Tenaga Kepelatihan",
       role: "Information Technology Administrator",
-      period: "2020 — 2022",
+      period: "Februari 2020 — Februari 2022",
       description:
         "As an IT Administrator, I managed and optimized the digital infrastructure supporting the competency certification process. I developed and maintained the LSP information system and Learning Management System (LMS), ensuring compliance with BNSP standards and seamless integration for online certification workflows. I performed LMS testing, troubleshooting, and error resolution, enhancing system reliability and user experience. Additionally, I automated administrative tasks such as certificate database management and report generation, handling an average of 700 records and certificates per month with improved accuracy and efficiency. I also provided technical support and training for assessors on LMS usage, ensuring smooth adoption of digital tools across certification activities.",
     },
@@ -78,7 +78,7 @@ export const profile = {
   // Tech stack yang dikuasai
   skills: {
     frontend: ["Next.js", "Vue.js", "React", "Tailwind CSS", "TypeScript"],
-    backend: ["Laravel", "Node.js", "Express.js", "REST API", "Golang"],
+    backend: ["Laravel", "Node.js", "Golang", "REST API"],
     mobile: ["Kotlin"],
     database: ["MySQL", "PostgreSQL", "MongoDB", "Redis", "Prisma"],
     devops: ["Docker", "Docker Compose", "Nginx", "VPS", "Git"],

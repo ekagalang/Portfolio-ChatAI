@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     siteName: "Galang Portfolio",
     title: "Galang — Fullstack Developer",
     description:
-      "Portfolio interaktif berbasis AI. Tanya apapun tentang Galang — skill, project, jasa, dan cara hire.",
+      "Tanyakan apapun tentang Saya langsung melalui AI assistant — skill, project, jasa, dan cara hire.",
     images: [
       {
         url: "/api/og",   // buat file ini (instruksi di bawah)
@@ -79,7 +79,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Galang — Fullstack Developer",
     description:
-      "Portfolio interaktif berbasis AI. Tanya apapun tentang Galang.",
+      "Tanyakan apapun tentang Saya langsung melalui AI assistant — skill, project, jasa, dan cara hire.",
     images: ["/api/og"],
     creator: "@ekagalang",   // ganti dengan Twitter kamu kalau ada
   },

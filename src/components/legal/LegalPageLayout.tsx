@@ -104,7 +104,7 @@ export function LegalPageLayout({ title, subtitle, updatedAt, children }: Props)
             fontSize: "11px", color: "hsl(var(--muted-foreground))",
             fontFamily: "var(--font-geist-mono)", margin: 0,
           }}>
-            © 2025 Galang. Semua hak dilindungi.
+            © 2026 Galang. Semua hak dilindungi.
           </p>
           <Link
             href="/"

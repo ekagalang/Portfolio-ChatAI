@@ -22,7 +22,7 @@ const jsonLd = {
   name: "Galang",
   url: "https://ekagalang.my.id",
   jobTitle: "Fullstack Developer",
-  description: "Fullstack Developer spesialis Laravel, Next.js, dan Flutter",
+  description: "Fullstack Developer spesialis pembuatan website, aplikasi mobile, dan API backend.",
   sameAs: [
     "https://github.com/ekagalang",
     "https://linkedin.com/in/ekagalang",

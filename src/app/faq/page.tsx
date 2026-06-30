@@ -14,16 +14,16 @@ export default function FAQPage() {
     <LegalPageLayout
       title="FAQ"
       subtitle="Pertanyaan yang sering ditanyakan seputar jasa yang saya tawarkan."
-      updatedAt="Juni 2025"
+      updatedAt="Juni 2026"
     >
       <LegalQ question="Berapa lama pengerjaan proyek?">
-        Tergantung kompleksitas: Landing Page 3–14 hari, Backend & API 1–4 minggu, Web App / Mobile App 1–8 minggu.
+        Tergantung kompleksitas: Landing Page 1–7 hari, Backend & API 1–4 minggu, Web App / Mobile App 1–8 minggu.
         Estimasi lebih akurat diberikan setelah diskusi brief dan scope proyek.
       </LegalQ>
 
       <LegalQ question="Bagaimana sistem pembayarannya?">
         Down payment (DP) 50% di awal sebagai tanda jadi dan alokasi waktu, pelunasan 50% setelah proyek selesai
-        dan disetujui klien. Pembayaran via transfer bank atau Duitku (QRIS, VA, dll).
+        dan disetujui klien. Pembayaran via transfer bank atau lainnya yang sudah disepakati.
       </LegalQ>
 
       <LegalQ question="Berapa kali bisa revisi?">
@@ -49,7 +49,7 @@ export default function FAQPage() {
 
       <LegalQ question="Apakah kamu menerima proyek dari luar kota/negeri?">
         Ya, semua komunikasi dan pengerjaan bisa dilakukan secara remote. Pembayaran bisa via transfer bank
-        lokal atau Duitku.
+        lokal atau metode pembayaran lain yang disepakati.
       </LegalQ>
 
       <LegalQ question="Apakah source code diberikan setelah proyek selesai?">
