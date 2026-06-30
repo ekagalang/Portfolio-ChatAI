@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { Providers } from "@/components/Providers";
 import "./globals.css";
 
 const BASE_URL = "https://ekagalang.my.id";
@@ -121,16 +122,19 @@ export default function RootLayout({
 }) {
   const umamiId  = process.env.NEXT_PUBLIC_UMAMI_ID;
   const umamiUrl = process.env.NEXT_PUBLIC_UMAMI_URL;
-  const duitkuScriptUrl =
-    process.env.DUITKU_ENV === "production"
-      ? "https://app-prod.duitku.com/lib/js/duitku.js"
-      : "https://app-sandbox.duitku.com/lib/js/duitku.js";
+  const midtransClientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY;
+  const midtransSnapUrl =
+    process.env.MIDTRANS_ENV === "production"
+      ? "https://app.midtrans.com/snap/snap.js"
+      : "https://app.sandbox.midtrans.com/snap/snap.js";
 
   return (
     <html lang="id" className="light" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-        <script src={duitkuScriptUrl} />
+        {midtransClientKey && (
+          <script src={midtransSnapUrl} data-client-key={midtransClientKey} />
+        )}
         {umamiId && umamiUrl && (
           <script
             defer
@@ -140,7 +144,9 @@ export default function RootLayout({
         )}
       </head>
       <body className={`${GeistSans.variable} ${GeistMono.variable}`}>
-        <ThemeProvider>{children}</ThemeProvider>
+        <Providers>
+          <ThemeProvider>{children}</ThemeProvider>
+        </Providers>
       </body>
     </html>
   );

@@ -1,22 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { Check, MessageCircle, CreditCard } from "lucide-react";
 import { services } from "@/data/services";
 import { profile } from "@/data/profile";
 import { formatIDR } from "@/lib/utils";
 import { LegalPageLayout } from "@/components/legal/LegalPageLayout";
-import { PaymentModal } from "@/components/PaymentModal";
-import { ToastContainer } from "@/components/Toast";
-import { useToast } from "@/hooks/useToast";
-
-type Service = (typeof services)[number];
 
 export function ServicesPageContent() {
-  const [pendingService, setPendingService] = useState<Service | null>(null);
-  const { toasts, addToast, removeToast } = useToast();
-
   return (
     <>
       <LegalPageLayout
@@ -94,8 +87,8 @@ export function ServicesPageContent() {
                 </div>
 
                 <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
-                  <button
-                    onClick={() => setPendingService(service)}
+                  <Link
+                    href={`/order/new?service=${service.id}`}
                     style={{
                       display: "flex", alignItems: "center", gap: "6px",
                       padding: "8px 14px", borderRadius: "8px",
@@ -103,6 +96,7 @@ export function ServicesPageContent() {
                       color: "hsl(var(--accent-foreground))",
                       border: "none", fontSize: "12px", fontWeight: 600,
                       fontFamily: "var(--font-geist-mono)",
+                      textDecoration: "none",
                       cursor: "pointer",
                       boxShadow: "0 0 10px hsl(var(--accent) / 0.25)",
                       transition: "opacity 0.15s ease",
@@ -112,7 +106,7 @@ export function ServicesPageContent() {
                   >
                     <CreditCard size={12} />
                     Pesan
-                  </button>
+                  </Link>
 
                   <a
                     href={`https://wa.me/${profile.contact.whatsapp}?text=Halo, saya tertarik dengan jasa ${service.title}`}
@@ -140,17 +134,6 @@ export function ServicesPageContent() {
           ))}
         </div>
       </LegalPageLayout>
-
-      <PaymentModal
-        service={pendingService}
-        language="id"
-        onClose={() => setPendingService(null)}
-        onSuccess={() => addToast("Pembayaran berhasil! Kami akan segera menghubungi kamu.", "success", 6000)}
-        onPending={() => addToast("Pembayaran sedang diproses. Cek email untuk konfirmasi.", "info", 6000)}
-        onError={() => addToast("Pembayaran gagal. Silakan coba lagi atau hubungi via WhatsApp.", "error", 6000)}
-      />
-
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </>
   );
 }

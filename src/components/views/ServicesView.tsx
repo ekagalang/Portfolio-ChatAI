@@ -1,26 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { Check, MessageCircle, CreditCard } from "lucide-react";
 import { services } from "@/data/services";
 import { formatIDR } from "@/lib/utils";
 import { profile } from "@/data/profile";
 import Link from "next/link";
-import { PaymentModal } from "@/components/PaymentModal";
-import { ToastContainer } from "@/components/Toast";
-import { useToast } from "@/hooks/useToast";
-
-type Service = (typeof services)[number];
 
 interface Props {
   language: "id" | "en";
 }
 
 export function ServicesView({ language }: Props) {
-  const [pendingService, setPendingService] = useState<Service | null>(null);
-  const { toasts, addToast, removeToast } = useToast();
-
   return (
     <>
       <div style={{ height: "100%", overflowY: "auto", padding: "24px 20px" }}>
@@ -126,9 +118,9 @@ export function ServicesView({ language }: Props) {
                   </div>
 
                   <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
-                    {/* Pesan Sekarang */}
-                    <button
-                      onClick={() => setPendingService(service)}
+                    {/* Pesan Sekarang → form request order */}
+                    <Link
+                      href={`/order/new?service=${service.id}`}
                       style={{
                         display: "flex", alignItems: "center", gap: "5px",
                         padding: "7px 11px", borderRadius: "8px",
@@ -137,6 +129,7 @@ export function ServicesView({ language }: Props) {
                         border: "none",
                         fontSize: "11px", fontWeight: 600,
                         fontFamily: "var(--font-geist-mono)",
+                        textDecoration: "none",
                         cursor: "pointer",
                         boxShadow: "0 0 10px hsl(var(--accent) / 0.25)",
                         transition: "opacity 0.15s ease",
@@ -146,7 +139,7 @@ export function ServicesView({ language }: Props) {
                     >
                       <CreditCard size={11} />
                       {language === "id" ? "Pesan" : "Order"}
-                    </button>
+                    </Link>
 
                     {/* Hubungi via WhatsApp */}
                     <a
@@ -183,26 +176,6 @@ export function ServicesView({ language }: Props) {
           </div>
         </motion.div>
       </div>
-
-      <PaymentModal
-        service={pendingService}
-        language={language}
-        onClose={() => setPendingService(null)}
-        onSuccess={() => addToast(
-          language === "id" ? "Pembayaran berhasil! Kami akan segera menghubungi kamu." : "Payment successful! We'll contact you soon.",
-          "success", 6000
-        )}
-        onPending={() => addToast(
-          language === "id" ? "Pembayaran sedang diproses. Cek email untuk konfirmasi." : "Payment is being processed. Check your email.",
-          "info", 6000
-        )}
-        onError={() => addToast(
-          language === "id" ? "Pembayaran gagal. Silakan coba lagi atau hubungi via WhatsApp." : "Payment failed. Please try again or contact via WhatsApp.",
-          "error", 6000
-        )}
-      />
-
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </>
   );
 }

@@ -1,10 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Sun, Moon, Terminal, Download, Globe } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { useIsMobile } from "@/hooks/useMediaQuery";
+import { AccountMenu } from "@/components/AccountMenu";
 import { profile } from "@/data/profile";
 
 interface Props {
@@ -55,8 +57,8 @@ export function Navbar({ language, onCVOpen, onLanguageToggle }: Props) {
         flexShrink: 0, zIndex: 10, position: "relative",
       }}
     >
-      {/* Brand */}
-      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      {/* Brand — links back to home */}
+      <Link href="/" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none", minWidth: 0, flex: "1 1 auto" }}>
         <div style={{
           width: "28px", height: "28px", borderRadius: "7px",
           background: "hsl(var(--accent))",
@@ -66,11 +68,12 @@ export function Navbar({ language, onCVOpen, onLanguageToggle }: Props) {
         }}>
           <Terminal size={13} color="hsl(var(--accent-foreground))" strokeWidth={2.5} />
         </div>
-        <div>
+        <div style={{ minWidth: 0 }}>
           <p style={{
             fontSize: "13px", fontWeight: 600,
             color: "hsl(var(--foreground))", lineHeight: 1.2,
             fontFamily: "var(--font-geist-mono)", margin: 0,
+            whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
           }}>
             {profile.name}
           </p>
@@ -83,11 +86,11 @@ export function Navbar({ language, onCVOpen, onLanguageToggle }: Props) {
             </p>
           )}
         </div>
-      </div>
+      </Link>
 
       {/* Center — status (sembunyikan di mobile kecil) */}
       {/* Right actions */}
-      <div style={{ display: "flex", alignItems: "center", gap: "4px", marginLeft: "auto" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
         {/* Mobile: tampilkan CV & Language di navbar */}
         {isMobile && onCVOpen && (
           <button
@@ -150,6 +153,10 @@ export function Navbar({ language, onCVOpen, onLanguageToggle }: Props) {
         )}
 
         <ThemeToggle />
+
+        <div style={{ width: "1px", height: "20px", background: "hsl(var(--border))", margin: "0 4px" }} />
+
+        <AccountMenu language={language} />
       </div>
     </motion.header>
   );

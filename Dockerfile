@@ -36,8 +36,18 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Prisma: skema + migrasi + CLI (untuk `migrate deploy` saat start) + engine
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
+
+# Folder data untuk file SQLite (mount volume ke sini di production)
+RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
+
 USER nextjs
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+# Terapkan migrasi lalu jalankan server
+CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && node server.js"]

@@ -1,0 +1,114 @@
+// Prisma schema — auth (Auth.js) + order & pembayaran
+// SQLite untuk single-instance. Upgrade ke Postgres dengan ganti provider + DATABASE_URL.
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────── Auth.js ─────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String? // null untuk akun OAuth-only
+  role          String    @default("customer") // customer | admin
+
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+
+  createdAt     DateTime  @default(now())
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ───────────────────────── Order & Payment ─────────────────────────
+
+model Order {
+  id           String   @id @default(cuid())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+
+  serviceId    String
+  serviceTitle String
+  brief        String
+  phone        String?
+
+  // requested | quoted | dp_paid | in_progress | awaiting_settlement | completed | cancelled
+  status       String   @default("requested")
+
+  agreedTotal  Int? // diisi admin saat quote
+  dpAmount     Int? // diisi admin saat quote
+  progressPct  Int      @default(0)
+  progressNote String?
+
+  payments     Payment[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Payment {
+  id                String    @id @default(cuid())
+  order             Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId           String
+
+  type              String // dp | settlement
+  grossAmount       Int
+  midtransOrderId   String    @unique // order_id ke Midtrans, mis. <orderId>-DP
+  transactionId     String?   @unique // transaction_id Midtrans (idempotency)
+  transactionStatus String    @default("pending")
+  paymentType       String?
+  snapToken         String?
+  paidAt            DateTime?
+
+  createdAt         DateTime  @default(now())
+
+  @@index([orderId])
+}

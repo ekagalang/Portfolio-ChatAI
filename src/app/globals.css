@@ -74,15 +74,29 @@
   --muted-foreground: 220 12% 34%;
 }
 
-/* ── Reset ── */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* ── Reset ──
+   Must live in @layer base so Tailwind utilities (in the later `utilities`
+   layer) can override it. An UNLAYERED universal reset beats every layered
+   utility regardless of specificity, which silently kills all padding and
+   margin utilities app-wide. */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 }
 
 html, body {
   width: 100%;
+  max-width: 100%;
+}
+
+/* Prevent stray horizontal scroll on narrow screens.
+   `clip` (not `hidden`) clips overflow without creating a scroll
+   container, so `position: sticky` keeps working. */
+html {
+  overflow-x: clip;
 }
 
 body {

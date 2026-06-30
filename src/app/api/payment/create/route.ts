@@ -1,73 +1,93 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createInvoice } from "@/lib/duitku";
-import { services } from "@/data/services";
-import type { CreatePaymentRequest } from "@/types/payment";
+import { auth } from "@/lib/auth";
+import { createSnapTransaction } from "@/lib/midtrans";
+import { getOrderForUser, createPaymentRecord } from "@/lib/orders";
 
-// Rate limit sederhana: max 5 request per menit per IP
+// Rate limit sederhana: max 5 request per menit per user
 const rateLimitMap = new Map<string, { count: number; reset: number }>();
-const RATE_LIMIT = 5;
-const RATE_WINDOW = 60_000;
-
-function checkRateLimit(ip: string): boolean {
+function checkRateLimit(key: string): boolean {
   const now = Date.now();
-  const entry = rateLimitMap.get(ip);
+  const entry = rateLimitMap.get(key);
   if (!entry || now > entry.reset) {
-    rateLimitMap.set(ip, { count: 1, reset: now + RATE_WINDOW });
+    rateLimitMap.set(key, { count: 1, reset: now + 60_000 });
     return true;
   }
-  if (entry.count >= RATE_LIMIT) return false;
+  if (entry.count >= 5) return false;
   entry.count++;
   return true;
 }
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for") ?? "unknown";
-  if (!checkRateLimit(ip)) {
+  const session = await auth();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Harus login" }, { status: 401 });
+  }
+  if (!checkRateLimit(session.user.id)) {
     return NextResponse.json({ error: "Terlalu banyak permintaan" }, { status: 429 });
   }
 
   try {
-    const body: CreatePaymentRequest = await req.json();
-    const { serviceId, customerName, email, phoneNumber, notes } = body;
-
-    if (!serviceId || !customerName || !email) {
-      return NextResponse.json({ error: "Field wajib tidak lengkap" }, { status: 400 });
+    const { orderId, type } = await req.json();
+    if (type !== "dp" && type !== "settlement") {
+      return NextResponse.json({ error: "Tipe pembayaran tidak valid" }, { status: 400 });
     }
 
-    const service = services.find((s) => s.id === serviceId);
-    if (!service) {
-      return NextResponse.json({ error: "Service tidak ditemukan" }, { status: 400 });
+    const order = await getOrderForUser(orderId, session.user.id);
+    if (!order) {
+      return NextResponse.json({ error: "Order tidak ditemukan" }, { status: 404 });
     }
 
-    const merchantOrderId = `${serviceId.toUpperCase().replace(/-/g, "")}-${Date.now()}`;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    // Validasi status & hitung nominal dari order (bukan dari input client)
+    let amount: number;
+    if (type === "dp") {
+      if (order.status !== "quoted") {
+        return NextResponse.json({ error: "DP hanya bisa dibayar saat status menunggu DP" }, { status: 400 });
+      }
+      amount = order.dpAmount ?? 0;
+    } else {
+      if (order.status !== "awaiting_settlement") {
+        return NextResponse.json({ error: "Pelunasan belum bisa dibayar" }, { status: 400 });
+      }
+      amount = (order.agreedTotal ?? 0) - (order.dpAmount ?? 0);
+    }
 
-    const result = await createInvoice({
-      paymentAmount: service.pricing.starting,
-      merchantOrderId,
-      productDetails: `${service.title}${notes ? ` — ${notes}` : ""}`,
-      customerVaName: customerName,
-      email,
-      phoneNumber,
-      callbackUrl: `${appUrl}/api/payment/callback`,
-      returnUrl: `${appUrl}/?payment=success`,
-      expiryPeriod: 1440, // 24 jam
+    if (amount <= 0) {
+      return NextResponse.json({ error: "Nominal tidak valid" }, { status: 400 });
+    }
+
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000").replace(/\/$/, "");
+    const midtransOrderId = `${order.id}-${type === "dp" ? "DP" : "STL"}-${Date.now()}`;
+
+    const result = await createSnapTransaction({
+      transaction_details: { order_id: midtransOrderId, gross_amount: amount },
+      customer_details: {
+        first_name: session.user.name ?? session.user.email ?? "Customer",
+        email: session.user.email ?? undefined,
+        phone: order.phone ?? undefined,
+      },
+      item_details: [
+        {
+          id: order.id,
+          name: `${type === "dp" ? "DP" : "Pelunasan"} — ${order.serviceTitle}`.slice(0, 50),
+          price: amount,
+          quantity: 1,
+        },
+      ],
+      callbacks: { finish: `${appUrl}/dashboard/orders/${order.id}` },
+      expiry: { unit: "hour", duration: 24 },
     });
 
-    if (result.statusCode !== "00") {
-      return NextResponse.json(
-        { error: `Gagal membuat transaksi: ${result.statusMessage}` },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json({
-      reference: result.reference,
-      paymentUrl: result.paymentUrl,
-      orderId: merchantOrderId,
+    await createPaymentRecord({
+      orderId: order.id,
+      type,
+      grossAmount: amount,
+      midtransOrderId,
+      snapToken: result.token,
     });
+
+    return NextResponse.json({ token: result.token, redirectUrl: result.redirect_url });
   } catch (err) {
     console.error("[payment/create]", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: "Gagal memproses pembayaran" }, { status: 500 });
   }
 }

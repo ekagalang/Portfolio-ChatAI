@@ -43,3 +43,7 @@ next-env.d.ts
 # ENV — jangan pernah di-commit!
 .env.local
 .env*.local
+
+# Prisma / SQLite
+/prisma/*.db
+/prisma/*.db-journal
