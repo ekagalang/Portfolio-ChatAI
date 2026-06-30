@@ -14,10 +14,18 @@ import {
   labelCls,
 } from "./ui";
 
+/** Hanya izinkan path relatif same-site — cegah open redirect ke domain lain. */
+function safeCallback(url: string | null): string {
+  if (url && url.startsWith("/") && !url.startsWith("//") && !url.startsWith("/\\")) {
+    return url;
+  }
+  return "/dashboard";
+}
+
 export function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
-  const callbackUrl = params.get("callbackUrl") ?? "/dashboard";
+  const callbackUrl = safeCallback(params.get("callbackUrl"));
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

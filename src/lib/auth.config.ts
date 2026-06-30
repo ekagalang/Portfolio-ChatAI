@@ -7,6 +7,16 @@ const adminEmails = (process.env.ADMIN_EMAILS ?? "")
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean);
 
+/**
+ * Email yang masuk allowlist admin otomatis dapat role admin (lihat jwt callback).
+ * Karena itu email tsb TIDAK boleh didaftarkan via credentials (cegah pre-registration
+ * privilege escalation) — admin hanya boleh masuk via Google (email terverifikasi).
+ */
+export function isAdminEmail(email?: string | null): boolean {
+  if (!email) return false;
+  return adminEmails.includes(email.toLowerCase().trim());
+}
+
 // Config dasar yang aman untuk Edge runtime (dipakai middleware).
 // Provider Credentials + Prisma adapter ditambahkan di auth.ts (Node only).
 export const authConfig = {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
+import { isAdminEmail } from "@/lib/auth.config";
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -21,6 +22,16 @@ export async function POST(req: NextRequest) {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
+
+    // Email admin (allowlist) tidak boleh daftar via password — wajib via Google.
+    // Mencegah penyerang "menyerobot" email admin lewat credentials (privilege escalation).
+    if (isAdminEmail(normalizedEmail)) {
+      return NextResponse.json(
+        { error: "Email ini harus masuk menggunakan Google." },
+        { status: 403 }
+      );
+    }
+
     const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
     if (existing) {
       return NextResponse.json({ error: "Email sudah terdaftar." }, { status: 409 });
