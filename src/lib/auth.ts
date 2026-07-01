@@ -8,6 +8,26 @@ import { authConfig } from "@/lib/auth.config";
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(prisma),
+  callbacks: {
+    ...authConfig.callbacks,
+    // Cegah user yang dibekukan login (mis. via Google). Credentials sudah
+    // ditolak di authorize(); ini menangkap OAuth & akun existing.
+    async signIn({ user }) {
+      const email = user.email?.toLowerCase();
+      if (!email) return true;
+      const dbUser = await prisma.user.findUnique({
+        where: { email },
+        select: { id: true, suspended: true },
+      });
+      if (dbUser?.suspended) return false;
+      if (dbUser) {
+        await prisma.user
+          .update({ where: { id: dbUser.id }, data: { lastLoginAt: new Date() } })
+          .catch(() => {});
+      }
+      return true;
+    },
+  },
   providers: [
     ...authConfig.providers,
     Credentials({
@@ -19,6 +39,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         const user = await prisma.user.findUnique({ where: { email } });
         if (!user?.passwordHash) return null;
+        if (user.suspended) return null; // akun dibekukan
 
         const ok = await bcrypt.compare(password, user.passwordHash);
         if (!ok) return null;

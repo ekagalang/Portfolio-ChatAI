@@ -93,6 +93,14 @@ export function LoginForm() {
             placeholder="••••••••"
             autoComplete="current-password"
           />
+          <div className="mt-1.5 text-right">
+            <Link
+              href="/forgot-password"
+              className="font-mono text-[11px] text-muted-foreground transition hover:text-accent"
+            >
+              Lupa password?
+            </Link>
+          </div>
         </div>
         <FormError>{error}</FormError>
         <SubmitButton loading={loading}>{loading ? "Memproses…" : "Masuk"}</SubmitButton>

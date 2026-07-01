@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { isAdminEmail } from "@/lib/auth.config";
+import { createEmailToken } from "@/lib/tokens";
+import { sendVerificationEmail } from "@/lib/email";
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -38,9 +40,17 @@ export async function POST(req: NextRequest) {
     }
 
     const passwordHash = await bcrypt.hash(String(password), 10);
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: { name: name.trim(), email: normalizedEmail, passwordHash },
     });
+
+    // Kirim email verifikasi (non-blocking — kegagalan tidak menggagalkan daftar).
+    try {
+      const token = await createEmailToken(user.id, "verify");
+      void sendVerificationEmail(normalizedEmail, name.trim(), token);
+    } catch (e) {
+      console.error("[register] gagal kirim verifikasi:", e);
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {

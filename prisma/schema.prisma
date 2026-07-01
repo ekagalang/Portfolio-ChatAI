@@ -21,12 +21,45 @@ model User {
   image         String?
   passwordHash  String? // null untuk akun OAuth-only
   role          String    @default("customer") // customer | admin
+  suspended     Boolean   @default(false) // akun dibekukan (tidak bisa login)
+  notes         String? // catatan admin
+  lastLoginAt   DateTime?
 
   accounts      Account[]
   sessions      Session[]
   orders        Order[]
+  emailTokens   EmailToken[]
 
   createdAt     DateTime  @default(now())
+}
+
+// Catatan aktivitas admin (freeze, reset password, edit notes, dsb.)
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      String
+  actorId     String
+  actorEmail  String
+  targetId    String?
+  targetEmail String?
+  detail      String?
+  createdAt   DateTime @default(now())
+
+  @@index([targetId])
+  @@index([createdAt])
+}
+
+// Token untuk verifikasi email & reset password (type: verify | reset)
+model EmailToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  type      String
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model Account {

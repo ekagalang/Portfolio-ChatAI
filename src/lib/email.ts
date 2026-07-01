@@ -60,6 +60,24 @@ function adminEmail(): string | undefined {
   return process.env.CONTACT_EMAIL;
 }
 
+// ───────────────── Verifikasi email ─────────────────
+export async function sendVerificationEmail(to: string, name: string, token: string): Promise<void> {
+  const url = `${appUrl()}/verify-email?token=${token}`;
+  const body =
+    p(`Halo ${esc(name)}, satu langkah lagi — konfirmasi alamat emailmu untuk mengaktifkan akun sepenuhnya.`) +
+    p("Link ini berlaku 48 jam. Abaikan email ini bila kamu tidak mendaftar.");
+  await send(to, "Verifikasi email kamu", wrap("Verifikasi Email", body, { label: "Verifikasi Email", url }));
+}
+
+// ───────────────── Reset password ─────────────────
+export async function sendPasswordResetEmail(to: string, name: string, token: string): Promise<void> {
+  const url = `${appUrl()}/reset-password?token=${token}`;
+  const body =
+    p(`Halo ${esc(name)}, ada permintaan untuk mereset password akunmu.`) +
+    p("Klik tombol di bawah untuk membuat password baru. Link berlaku 1 jam. Jika ini bukan kamu, abaikan saja.");
+  await send(to, "Reset password", wrap("Reset Password", body, { label: "Reset Password", url }));
+}
+
 // ───────────────── Fase 1: order baru → admin ─────────────────
 export async function sendNewOrderToAdmin(o: {
   orderId: string;

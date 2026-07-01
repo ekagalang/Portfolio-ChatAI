@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutDashboard, PlusCircle, ShieldCheck, type LucideIcon } from "lucide-react";
+import { Home, LayoutDashboard, PlusCircle, ShieldCheck, Users, BarChart3, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/Navbar";
 import { useLang } from "@/components/LangProvider";
@@ -28,6 +28,8 @@ export function DashboardShell({
     ? [
         { href: "/", label: t.nav.home, icon: Home },
         { href: "/admin", label: t.nav.admin, icon: ShieldCheck },
+        { href: "/admin/analytics", label: t.nav.analytics, icon: BarChart3 },
+        { href: "/admin/users", label: t.nav.users, icon: Users },
       ]
     : [
         { href: "/", label: t.nav.home, icon: Home },
@@ -39,7 +41,7 @@ export function DashboardShell({
     if (href === "/") return false; // exit link, never highlighted
     if (href === "/dashboard")
       return pathname === "/dashboard" || pathname.startsWith("/dashboard/orders");
-    if (href === "/admin") return pathname === "/admin" || pathname.startsWith("/admin/");
+    if (href === "/admin") return pathname === "/admin" || pathname.startsWith("/admin/orders");
     return pathname.startsWith(href);
   };
 
