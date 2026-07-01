@@ -100,7 +100,9 @@ pembayaran (idempotency/verifikasi nominal), dan quality gates (test/CI).
 > seluruhnya** — termasuk Playwright E2E (login→order→quote→bayar, 6 test),
 > CodeQL, Dependabot, Vitest+CI (di Postgres), security headers, Postgres+Redis,
 > streaming asli, timeout Gemini, emailVerified (soft badge), pin next-auth,
-> index & cascade. Berikutnya: 🟢 **P2** (mulai Invoice PDF).
+> index & cascade. 🟢 **P2**: #13 **Invoice/kwitansi PDF** ✅ (per order,
+> `/api/orders/[id]/invoice`). Berikutnya P2: termin cicilan, komplain/refund,
+> notif WhatsApp, audit log global.
 
 ### 🔴 P0 — Correctness & keamanan (dulu; menyangkut uang & data)
 1. Idempotency webhook **atomic** — `updateMany({ where: { midtransOrderId, paidAt: null }, ... })`
