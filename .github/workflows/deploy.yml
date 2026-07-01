@@ -1,0 +1,55 @@
+name: Deploy
+
+# Deploy setelah workflow "CI" sukses di branch main. Berjalan di self-hosted
+# runner VPS yang punya akses Docker + direktori deploy /home/a/dck/main.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main' }}
+    runs-on: [self-hosted, portfolio]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      # Sinkronkan source ke direktori deploy (context build compose).
+      # .env.production TIDAK ikut (secret dijaga di VPS).
+      - name: Sync ke /home/a/dck/main
+        run: |
+          rsync -a --delete \
+            --exclude='.git/' \
+            --exclude='.env.production' \
+            --exclude='node_modules/' \
+            --exclude='.next/' \
+            "$GITHUB_WORKSPACE/" /home/a/dck/main/
+
+      # Build image (container lama tetap melayani) lalu recreate container.
+      # Migrasi Postgres (`prisma migrate deploy`) dijalankan otomatis oleh CMD
+      # Dockerfile saat container start.
+      - name: Build & deploy
+        working-directory: /home/a/dck/main
+        run: docker compose --env-file .env.production up -d --build
+
+      - name: Tunggu container healthy
+        run: |
+          for i in $(seq 1 24); do
+            s=$(docker inspect -f '{{.State.Health.Status}}' main_apps 2>/dev/null || echo none)
+            echo "health($i): $s"
+            [ "$s" = "healthy" ] && exit 0
+            sleep 5
+          done
+          echo "::error::main_apps tidak healthy setelah deploy"
+          docker logs --tail=100 main_apps || true
+          exit 1
+
+      # Reload nginx agar re-resolve IP container baru (proxy_pass statis).
+      - name: Reload nginx
+        run: docker exec nginx_utama nginx -s reload

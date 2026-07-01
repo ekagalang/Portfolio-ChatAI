@@ -17,7 +17,8 @@ services:
       # DATABASE_URL (Postgres) + secret lain diambil dari .env.production.
       # Untuk Postgres/Redis di jaringan Docker, lihat docs/SCALING.md.
     networks:
-      - frontend
+      - frontend # nginx_utama (proxy) ada di sini
+      - backend # postgres_docker + redis_cache ada di sini
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
       interval: 30s
@@ -36,3 +37,12 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+
+# Jaringan Docker eksternal yang sudah ada di VPS (dibuat oleh stack utama).
+networks:
+  frontend:
+    external: true
+    name: dck_frontend
+  backend:
+    external: true
+    name: dck_backend
