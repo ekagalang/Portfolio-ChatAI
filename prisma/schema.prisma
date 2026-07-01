@@ -44,6 +44,7 @@ model AuditLog {
   detail      String?
   createdAt   DateTime @default(now())
 
+  @@index([actorId])
   @@index([targetId])
   @@index([createdAt])
 }
