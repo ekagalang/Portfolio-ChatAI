@@ -28,7 +28,16 @@ export async function createOrderRequest(input: {
   brief: string;
   phone?: string;
 }) {
-  return prisma.order.create({ data: { ...input, status: "requested" } });
+  // Nomor urut rapi (#0001) — dihitung dalam transaksi. SQLite men-serialize
+  // write, jadi tak akan bentrok pada single-instance; @unique sebagai jaring.
+  return prisma.$transaction(async (tx) => {
+    const last = await tx.order.findFirst({
+      orderBy: { orderNumber: "desc" },
+      select: { orderNumber: true },
+    });
+    const orderNumber = (last?.orderNumber ?? 0) + 1;
+    return tx.order.create({ data: { ...input, orderNumber, status: "requested" } });
+  });
 }
 
 export async function getUserOrders(userId: string) {

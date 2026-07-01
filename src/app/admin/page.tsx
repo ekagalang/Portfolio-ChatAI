@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { requireAdmin } from "@/lib/session";
 import { listOrders } from "@/lib/orders";
-import { formatIDR, cn } from "@/lib/utils";
+import { formatIDR, cn, orderLabel } from "@/lib/utils";
 import { ORDER_STATUS_LABEL } from "@/lib/payment-config";
 import { getLang } from "@/lib/i18n.server";
 import { dateLocale, t } from "@/lib/i18n";
@@ -76,6 +76,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-foreground">{o.serviceTitle}</p>
                     <p className="mt-1 truncate font-mono text-[11px] text-muted-foreground">
+                      {orderLabel(o)}
+                      {" · "}
                       {o.user.name ?? o.user.email}
                       {" · "}
                       {new Date(o.createdAt).toLocaleDateString(dateLocale(lang), { day: "numeric", month: "short" })}

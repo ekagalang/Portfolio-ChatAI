@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { requireAdmin } from "@/lib/session";
 import { getOrderById } from "@/lib/orders";
-import { formatIDR } from "@/lib/utils";
+import { formatIDR, orderLabel } from "@/lib/utils";
 import { getLang } from "@/lib/i18n.server";
 import { t } from "@/lib/i18n";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
@@ -32,7 +32,7 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
       <div className="mb-6 flex items-start justify-between gap-3">
         <div>
           <h1 className="font-mono text-xl font-semibold tracking-tight text-foreground">{order.serviceTitle}</h1>
-          <p className="mt-1 font-mono text-[11px] text-muted-foreground">#{order.id.slice(-6)}</p>
+          <p className="mt-1 font-mono text-[11px] text-muted-foreground">{orderLabel(order)}</p>
         </div>
         <StatusBadge status={order.status} />
       </div>

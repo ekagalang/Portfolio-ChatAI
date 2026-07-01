@@ -102,6 +102,7 @@ model VerificationToken {
 
 model Order {
   id           String   @id @default(cuid())
+  orderNumber  Int?     @unique // nomor urut rapi untuk ditampilkan (#0001)
   user         User     @relation(fields: [userId], references: [id])
   userId       String
 

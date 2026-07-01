@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { requireUser } from "@/lib/session";
 import { getUserOrders } from "@/lib/orders";
-import { formatIDR } from "@/lib/utils";
+import { formatIDR, orderLabel } from "@/lib/utils";
 import { getLang } from "@/lib/i18n.server";
 import { dateLocale, t } from "@/lib/i18n";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
@@ -75,7 +75,7 @@ export default async function DashboardPage() {
                     <p className="truncate text-sm font-semibold text-foreground">{o.serviceTitle}</p>
                     <p className="mt-1 font-mono text-[11px] text-muted-foreground">
                       {new Date(o.createdAt).toLocaleDateString(dateLocale(lang), { day: "numeric", month: "short", year: "numeric" })}
-                      {" · "}#{o.id.slice(-6)}
+                      {" · "}{orderLabel(o)}
                     </p>
                   </div>
                   <StatusBadge status={o.status} />

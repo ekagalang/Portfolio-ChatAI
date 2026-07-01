@@ -16,3 +16,10 @@ export function formatIDR(amount: number): string {
 export function truncate(str: string, length: number): string {
   return str.length > length ? str.substring(0, length) + "..." : str;
 }
+
+/** Label order rapi: #0001. Fallback ke potongan id bila nomor belum ada. */
+export function orderLabel(order: { orderNumber?: number | null; id: string }): string {
+  return order.orderNumber != null
+    ? `#${String(order.orderNumber).padStart(4, "0")}`
+    : `#${order.id.slice(-6)}`;
+}

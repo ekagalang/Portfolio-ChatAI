@@ -5,7 +5,7 @@ import { requireAdmin } from "@/lib/session";
 import { prisma } from "@/lib/db";
 import { getAuditForTarget } from "@/lib/audit";
 import { isAdminEmail } from "@/lib/auth.config";
-import { formatIDR } from "@/lib/utils";
+import { formatIDR, orderLabel } from "@/lib/utils";
 import { getLang } from "@/lib/i18n.server";
 import { dateLocale, t } from "@/lib/i18n";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
@@ -133,6 +133,8 @@ export default async function AdminUserDetail({ params }: { params: Promise<{ id
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-foreground">{o.serviceTitle}</p>
                       <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
+                        {orderLabel(o)}
+                        {" · "}
                         {fmtDate(o.createdAt)}
                         {" · "}
                         {o.agreedTotal != null ? formatIDR(o.agreedTotal) : tt.common.awaitingQuote}

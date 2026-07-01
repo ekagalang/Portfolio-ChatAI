@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, MessageCircle } from "lucide-react";
 import { requireUser } from "@/lib/session";
 import { getOrderForUser } from "@/lib/orders";
-import { formatIDR, cn } from "@/lib/utils";
+import { formatIDR, cn, orderLabel } from "@/lib/utils";
 import { ORDER_LIFECYCLE, ORDER_STATUS_LABEL } from "@/lib/payment-config";
 import { getLang } from "@/lib/i18n.server";
 import { t } from "@/lib/i18n";
@@ -37,7 +37,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
       <div className="mb-6 flex items-start justify-between gap-3">
         <div>
           <h1 className="font-mono text-xl font-semibold tracking-tight text-foreground">{order.serviceTitle}</h1>
-          <p className="mt-1 font-mono text-[11px] text-muted-foreground">#{order.id.slice(-6)}</p>
+          <p className="mt-1 font-mono text-[11px] text-muted-foreground">{orderLabel(order)}</p>
         </div>
         <StatusBadge status={order.status} />
       </div>
