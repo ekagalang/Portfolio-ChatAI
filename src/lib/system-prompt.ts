@@ -5,7 +5,12 @@ import { formatIDR } from "@/lib/utils";
 
 // Fungsi ini membangun system prompt yang dikirim ke Gemini
 // Semua informasi tentang kamu di-inject di sini
-export function buildSystemPrompt(): string {
+export function buildSystemPrompt(lang: "id" | "en" = "id"): string {
+  const langRule =
+    lang === "en"
+      ? "- Always answer in clear, friendly, and professional English\n- If the visitor writes in Indonesian, you may follow their language"
+      : "- Jawab selalu dalam Bahasa Indonesia yang ramah dan profesional\n- Jika visitor menulis dalam bahasa Inggris, kamu boleh mengikuti bahasa mereka";
+
   const skillsFlat = Object.entries(profile.skills)
     .map(([cat, items]) => `${cat}: ${items.join(", ")}`)
     .join("\n  ");
@@ -34,8 +39,7 @@ Tugasmu adalah membantu visitor yang mengunjungi portfolio website ${profile.nam
 untuk mengenal lebih jauh tentang dirinya, skill, project, dan jasa yang ditawarkan.
 
 PENTING:
-- Jawab selalu dalam Bahasa Indonesia yang ramah dan profesional
-- Jika ditanya dalam bahasa Inggris, boleh jawab dalam bahasa Inggris
+${langRule}
 - Jangan pernah mengarang informasi — hanya gunakan data yang tersedia di bawah
 - Jika ada pertanyaan yang tidak bisa dijawab dari data di bawah, arahkan visitor untuk menghubungi langsung
 - Gunakan formatting markdown (bold, bullet point) agar jawaban mudah dibaca

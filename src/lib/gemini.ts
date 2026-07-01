@@ -4,6 +4,10 @@ export const GEMINI_MODEL = "gemini-2.5-flash";
 export const GEMINI_FALLBACK_MODEL = "gemini-2.5-flash-lite";
 export const GEMINI_CHAT_MODELS = [GEMINI_MODEL, GEMINI_FALLBACK_MODEL] as const;
 
+// Timeout per-request; SDK membatalkan fetch secara internal saat lewat batas ini,
+// jadi upstream yang hang tidak menggantung request kita.
+export const GEMINI_TIMEOUT_MS = 30_000;
+
 function getApiKey() {
   const apiKey = process.env.GEMINI_API_KEY;
 
@@ -26,14 +30,17 @@ export function getGeminiModel(modelName = GEMINI_MODEL) {
   const genAI = getGeminiClient();
 
   // gemini-2.5-flash untuk kualitas utama, flash-lite untuk fallback throughput.
-  return genAI.getGenerativeModel({
-    model: modelName,
-    generationConfig: {
-      maxOutputTokens: 1024,
-      temperature: 0.7,
-      topP: 0.9,
+  return genAI.getGenerativeModel(
+    {
+      model: modelName,
+      generationConfig: {
+        maxOutputTokens: 1024,
+        temperature: 0.7,
+        topP: 0.9,
+      },
     },
-  });
+    { timeout: GEMINI_TIMEOUT_MS }
+  );
 }
 
 function getErrorStatus(error: unknown): number | undefined {

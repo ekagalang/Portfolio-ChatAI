@@ -28,29 +28,6 @@ function buildChatHistory(history: ChatHistory[], systemPrompt: string): ChatHis
   ];
 }
 
-function splitTextIntoChunks(text: string, chunkSize = 48) {
-  const words = text.split(/\s+/).filter(Boolean);
-  const chunks: string[] = [];
-  let current = "";
-
-  for (const word of words) {
-    const candidate = current ? `${current} ${word}` : word;
-    if (candidate.length > chunkSize && current) {
-      chunks.push(`${current} `);
-      current = word;
-      continue;
-    }
-
-    current = candidate;
-  }
-
-  if (current) {
-    chunks.push(current);
-  }
-
-  return chunks.length > 0 ? chunks : [text];
-}
-
 export async function POST(req: NextRequest) {
   try {
     // ─── Rate Limiting ───
@@ -61,10 +38,12 @@ export async function POST(req: NextRequest) {
 
     // ─── Parse Request Body ───
     const body = await req.json();
-    const { message, history } = body as {
+    const { message, history, language } = body as {
       message: string;
       history: ChatHistory[];
+      language?: string;
     };
+    const lang: "id" | "en" = language === "en" ? "en" : "id";
 
     // Validasi input
     if (!message || typeof message !== "string") {
@@ -84,46 +63,45 @@ export async function POST(req: NextRequest) {
     // Batasi history: array valid + hanya N turn terakhir.
     const safeHistory = Array.isArray(history) ? history.slice(-MAX_HISTORY) : [];
 
-    // ─── Build System Prompt ───
-    const systemPrompt = buildSystemPrompt();
+    // ─── Build System Prompt (mengikuti bahasa terpilih) ───
+    const systemPrompt = buildSystemPrompt(lang);
     const geminiHistory = buildChatHistory(safeHistory, systemPrompt);
+
+    // Mulai STREAM dari Gemini. Retry + fallback model hanya di tahap awal ini
+    // (sebelum byte pertama). Setelah streaming mulai, error di tengah dikirim
+    // sebagai event {error} karena tidak bisa lagi ganti model.
     const { result, modelName } = await withGeminiModelFallback(async (selectedModel) => {
       const chat = getGeminiModel(selectedModel).startChat({ history: geminiHistory });
-      return chat.sendMessage(message);
+      return chat.sendMessageStream(message);
     });
-    const fullText = result.response.text().trim();
 
     if (modelName !== "gemini-2.5-flash") {
       console.warn(`Chat API fallback model in use: ${modelName}`);
     }
 
-    if (!fullText) {
-      return NextResponse.json(
-        { error: "AI tidak mengembalikan respons." },
-        { status: 502 }
-      );
-    }
-
-    // Streaming response agar terasa real-time seperti ChatGPT/Claude
+    // Alirkan token Gemini ke SSE begitu tiba (streaming asli — TTFB nyata).
+    const encoder = new TextEncoder();
     const stream = new ReadableStream({
       async start(controller) {
-        const encoder = new TextEncoder();
         try {
-          for (const text of splitTextIntoChunks(fullText)) {
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ text })}\n\n`)
-            );
-            await new Promise((resolve) => setTimeout(resolve, 18));
+          let produced = false;
+          for await (const chunk of result.stream) {
+            const text = chunk.text();
+            if (text) {
+              produced = true;
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
+            }
           }
-
-          // Signal bahwa stream selesai
+          if (!produced) {
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify({ error: "AI tidak mengembalikan respons." })}\n\n`)
+            );
+          }
           controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
         } catch (streamError) {
           console.error("Stream error:", streamError);
           controller.enqueue(
-            encoder.encode(
-              `data: ${JSON.stringify({ error: "Stream terputus." })}\n\n`
-            )
+            encoder.encode(`data: ${JSON.stringify({ error: "Stream terputus." })}\n\n`)
           );
         } finally {
           controller.close();
