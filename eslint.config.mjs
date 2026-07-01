@@ -13,6 +13,14 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    // Pola yang disengaja & aman di app ini → turunkan ke warning (tetap terlihat,
+    // tapi tidak memblok CI): hidrasi tema via effect + skrip Snap Midtrans.
+    rules: {
+      "react-hooks/set-state-in-effect": "warn",
+      "@next/next/no-sync-scripts": "warn",
+    },
+  },
 ]);
 
 export default eslintConfig;
