@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, FileText } from "lucide-react";
 import { requireAdmin } from "@/lib/session";
 import { getOrderById } from "@/lib/orders";
+import { getTicketsForOrder } from "@/lib/tickets";
+import { AdminTicketActions } from "@/components/admin/AdminTicketActions";
 import { formatIDR, orderLabel } from "@/lib/utils";
 import { getLang } from "@/lib/i18n.server";
 import { t } from "@/lib/i18n";
@@ -20,6 +22,14 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
   if (!order) notFound();
 
   const tt = t(await getLang());
+  const tickets = (await getTicketsForOrder(order.id)).map((tc) => ({
+    id: tc.id,
+    type: tc.type,
+    message: tc.message,
+    status: tc.status,
+    response: tc.response,
+    createdAt: tc.createdAt.toISOString(),
+  }));
   const total = order.agreedTotal ?? 0;
   const dp = order.dpAmount ?? 0;
 
@@ -85,6 +95,8 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
               </div>
             </Panel>
           )}
+
+          <AdminTicketActions tickets={tickets} />
         </div>
 
         {/* Right: actions */}

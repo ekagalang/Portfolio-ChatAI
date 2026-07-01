@@ -123,11 +123,30 @@ model Order {
   progressNote String?
 
   payments     Payment[]
+  tickets      Ticket[]
 
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   @@index([userId])
+  @@index([status])
+}
+
+// Komplain / permintaan revisi / permintaan refund per order.
+model Ticket {
+  id        String   @id @default(cuid())
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String
+
+  type      String // revision | complaint | refund
+  message   String
+  status    String   @default("open") // open | in_review | resolved | rejected
+  response  String? // balasan admin
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
   @@index([status])
 }
 

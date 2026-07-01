@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { ChevronLeft, MessageCircle, FileText } from "lucide-react";
 import { requireUser } from "@/lib/session";
 import { getOrderForUser, paidSoFar } from "@/lib/orders";
+import { getTicketsForOrder } from "@/lib/tickets";
+import { TicketSection } from "@/components/dashboard/TicketSection";
 import { formatIDR, cn, orderLabel } from "@/lib/utils";
 import { ORDER_LIFECYCLE, ORDER_STATUS_LABEL } from "@/lib/payment-config";
 import { getLang } from "@/lib/i18n.server";
@@ -22,6 +24,14 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
 
   const lang = await getLang();
   const tt = t(lang);
+  const tickets = (await getTicketsForOrder(order.id)).map((tc) => ({
+    id: tc.id,
+    type: tc.type,
+    message: tc.message,
+    status: tc.status,
+    response: tc.response,
+    createdAt: tc.createdAt.toISOString(),
+  }));
   const total = order.agreedTotal ?? 0;
   const dp = order.dpAmount ?? 0;
   const paid = paidSoFar(order.payments);
@@ -102,6 +112,8 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             <SectionLabel>{tt.order.brief}</SectionLabel>
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{order.brief}</p>
           </Panel>
+
+          {order.status !== "requested" && <TicketSection orderId={order.id} tickets={tickets} />}
         </div>
 
         {/* Right: pricing + actions */}

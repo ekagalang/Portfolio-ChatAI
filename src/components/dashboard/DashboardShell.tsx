@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LayoutDashboard, PlusCircle, ShieldCheck, Users, BarChart3, ScrollText, type LucideIcon } from "lucide-react";
+import { Home, LayoutDashboard, PlusCircle, ShieldCheck, Users, BarChart3, ScrollText, Ticket, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/Navbar";
 import { useLang } from "@/components/LangProvider";
@@ -33,6 +33,7 @@ export function DashboardShell({
         { href: "/admin", label: t.nav.admin, icon: ShieldCheck },
         { href: "/admin/analytics", label: t.nav.analytics, icon: BarChart3 },
         { href: "/admin/users", label: t.nav.users, icon: Users },
+        { href: "/admin/tickets", label: t.ticket.navTitle, icon: Ticket },
         { href: "/admin/audit", label: t.audit.title, icon: ScrollText },
       ]
     : [
