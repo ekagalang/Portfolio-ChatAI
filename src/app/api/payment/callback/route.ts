@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
       transactionStatus: transaction_status,
       paymentType: payment_type,
       status,
+      grossAmount: parseFloat(gross_amount), // rupiah; dicocokkan ke nominal tercatat
     });
 
     console.log(`[payment/callback] ${status.toUpperCase()} — ${order_id} (${transaction_status})`);

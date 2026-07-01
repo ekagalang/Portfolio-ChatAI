@@ -1,38 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
-
-// Simple rate limiter per IP — max 3 pesan per 10 menit
-const contactRateLimit = new Map<string, { count: number; resetAt: number }>();
-
-function checkContactLimit(ip: string): boolean {
-  const now = Date.now();
-  const window = 10 * 60 * 1000; // 10 menit
-  const record = contactRateLimit.get(ip);
-
-  if (!record || now > record.resetAt) {
-    contactRateLimit.set(ip, { count: 1, resetAt: now + window });
-    return true;
-  }
-  if (record.count >= 3) return false;
-  record.count++;
-  return true;
-}
+import { rateLimit, clientIp, tooMany } from "@/lib/rate-limit";
 
 function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+// Escape nilai user sebelum disisipkan ke HTML email (cegah HTML injection).
+function esc(s: string): string {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 export async function POST(req: NextRequest) {
   try {
-    // ── Rate limit ──
-    const ip =
-      req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
-
-    if (!checkContactLimit(ip)) {
-      return NextResponse.json(
-        { error: "Terlalu banyak pesan. Coba lagi dalam 10 menit." },
-        { status: 429 }
-      );
+    // ── Rate limit: 3 pesan / 10 menit per IP ──
+    const rl = rateLimit(`contact:${clientIp(req)}`, 3, 10 * 60 * 1000);
+    if (!rl.ok) {
+      return tooMany(rl.retryAfterSec, "Terlalu banyak pesan. Coba lagi dalam 10 menit.");
     }
 
     // ── Validasi input ──
@@ -166,20 +155,20 @@ function buildEmailHTML({
                     <tr>
                       <td style="padding-bottom:16px;">
                         <p style="margin:0 0 4px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;">Dari</p>
-                        <p style="margin:0;font-size:14px;color:#e2e8f0;">${name}</p>
+                        <p style="margin:0;font-size:14px;color:#e2e8f0;">${esc(name)}</p>
                       </td>
                     </tr>
                     <tr>
                       <td style="padding-bottom:16px;">
                         <p style="margin:0 0 4px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;">Email</p>
-                        <a href="mailto:${email}" style="margin:0;font-size:14px;color:#3bba6e;text-decoration:none;">${email}</a>
+                        <a href="mailto:${esc(email)}" style="margin:0;font-size:14px;color:#3bba6e;text-decoration:none;">${esc(email)}</a>
                       </td>
                     </tr>
                     <tr>
                       <td style="padding-bottom:16px;">
                         <p style="margin:0 0 8px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:#64748b;">Pesan</p>
                         <div style="background:#0f1117;border:1px solid #1e2130;border-radius:8px;padding:16px;">
-                          <p style="margin:0;font-size:13px;color:#cbd5e1;line-height:1.7;white-space:pre-wrap;">${message}</p>
+                          <p style="margin:0;font-size:13px;color:#cbd5e1;line-height:1.7;white-space:pre-wrap;">${esc(message)}</p>
                         </div>
                       </td>
                     </tr>
@@ -195,7 +184,7 @@ function buildEmailHTML({
               <!-- CTA -->
               <tr>
                 <td style="padding:0 28px 28px;">
-                  <a href="mailto:${email}"
+                  <a href="mailto:${esc(email)}"
                     style="display:inline-block;padding:10px 20px;background:#3bba6e;color:#0f1117;
                     border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">
                     Balas Sekarang →
@@ -230,7 +219,7 @@ function buildAutoReplyHTML({ name }: { name: string }): string {
                     ekagalang.my.id
                   </p>
                   <h1 style="margin:6px 0 20px;font-size:18px;color:#e2e8f0;font-weight:600;">
-                    Hallo ${name}!
+                    Hallo ${esc(name)}!
                   </h1>
                   <p style="margin:0 0 12px;font-size:13px;color:#94a3b8;line-height:1.7;">
                     Terima kasih sudah menghubungi saya. Pesan kamu sudah masuk

@@ -22,11 +22,19 @@ export function verifyNotificationSignature(
   grossAmount: string,
   incomingSignature: string
 ): boolean {
+  if (!SERVER_KEY) {
+    console.error("[midtrans] MIDTRANS_SERVER_KEY belum diset — tolak notifikasi.");
+    return false;
+  }
   const expected = crypto
     .createHash("sha512")
     .update(`${orderId}${statusCode}${grossAmount}${SERVER_KEY}`)
     .digest("hex");
-  return expected === incomingSignature;
+  const a = Buffer.from(expected, "utf8");
+  const b = Buffer.from(incomingSignature ?? "", "utf8");
+  // Bandingkan konstan-waktu (cegah timing attack); panjang beda → pasti tidak sama.
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
 }
 
 export async function createSnapTransaction(

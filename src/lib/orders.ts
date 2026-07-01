@@ -114,7 +114,10 @@ export async function createPaymentRecord(input: {
 }
 
 /**
- * Terapkan notifikasi webhook secara idempotent.
+ * Terapkan notifikasi webhook secara idempotent & aman-nominal.
+ * - Verifikasi `grossAmount` (rupiah) cocok dengan nilai yang tercatat.
+ * - "Klaim" pembayaran secara ATOMIC (updateMany dengan guard paidAt:null) agar
+ *   notifikasi ganda yang datang bersamaan tidak menggandakan transisi/email.
  * Mengembalikan apakah ini transisi sukses pertama (untuk trigger email sekali).
  */
 export async function applyWebhook(params: {
@@ -123,36 +126,60 @@ export async function applyWebhook(params: {
   transactionStatus: string;
   paymentType?: string;
   status: PaymentStatus;
-}): Promise<{ firstSuccess: boolean; type?: string; orderId?: string }> {
-  const { midtransOrderId, transactionId, transactionStatus, paymentType, status } = params;
+  grossAmount: number; // rupiah dari notifikasi (sudah di-parse)
+}): Promise<{ firstSuccess: boolean; type?: string; orderId?: string; amountMismatch?: boolean }> {
+  const { midtransOrderId, transactionId, transactionStatus, paymentType, status, grossAmount } =
+    params;
 
   const payment = await prisma.payment.findUnique({
     where: { midtransOrderId },
-    include: { order: true },
+    select: { type: true, orderId: true, grossAmount: true },
   });
   if (!payment) return { firstSuccess: false };
 
-  const wasPaid = payment.paidAt != null;
-
-  await prisma.payment.update({
-    where: { midtransOrderId },
-    data: {
-      transactionId,
-      transactionStatus,
-      paymentType,
-      paidAt: status === "success" ? payment.paidAt ?? new Date() : payment.paidAt,
-    },
-  });
-
-  // Transisi status order pada sukses pertama
-  if (status === "success" && !wasPaid) {
-    if (payment.type === "dp" && payment.order.status === "quoted") {
-      await prisma.order.update({ where: { id: payment.orderId }, data: { status: "dp_paid" } });
-    } else if (payment.type === "settlement" && payment.order.status === "awaiting_settlement") {
-      await prisma.order.update({ where: { id: payment.orderId }, data: { status: "completed" } });
-    }
-    return { firstSuccess: true, type: payment.type, orderId: payment.orderId };
+  // ── Verifikasi nominal: tolak bila tidak sama dengan yang ditagih ──
+  if (Math.round(grossAmount) !== payment.grossAmount) {
+    console.error("[payment] Nominal webhook tidak cocok:", {
+      midtransOrderId,
+      diterima: grossAmount,
+      diharapkan: payment.grossAmount,
+    });
+    return {
+      firstSuccess: false,
+      type: payment.type,
+      orderId: payment.orderId,
+      amountMismatch: true,
+    };
   }
 
+  if (status === "success") {
+    // Klaim atomic + transisi order dalam satu transaksi.
+    const claimed = await prisma.$transaction(async (tx) => {
+      const claim = await tx.payment.updateMany({
+        where: { midtransOrderId, paidAt: null },
+        data: { paidAt: new Date(), transactionId, transactionStatus, paymentType },
+      });
+      if (claim.count === 0) return false; // sudah diproses sebelumnya
+
+      const order = await tx.order.findUnique({
+        where: { id: payment.orderId },
+        select: { status: true },
+      });
+      if (payment.type === "dp" && order?.status === "quoted") {
+        await tx.order.update({ where: { id: payment.orderId }, data: { status: "dp_paid" } });
+      } else if (payment.type === "settlement" && order?.status === "awaiting_settlement") {
+        await tx.order.update({ where: { id: payment.orderId }, data: { status: "completed" } });
+      }
+      return true;
+    });
+
+    return { firstSuccess: claimed, type: payment.type, orderId: payment.orderId };
+  }
+
+  // Status non-sukses (pending/failed): perbarui field transaksi, jangan sentuh paidAt.
+  await prisma.payment.update({
+    where: { midtransOrderId },
+    data: { transactionId, transactionStatus, paymentType },
+  });
   return { firstSuccess: false, type: payment.type, orderId: payment.orderId };
 }

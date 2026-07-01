@@ -5,29 +5,10 @@ import {
   withGeminiModelFallback,
 } from "@/lib/gemini";
 import { buildSystemPrompt } from "@/lib/system-prompt";
+import { rateLimit, clientIp, tooMany } from "@/lib/rate-limit";
 import { ChatHistory } from "@/types/chat";
 
-// Simple in-memory rate limiter per IP
-// Untuk production bisa diganti Redis
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 20;        // max request per window
-const RATE_WINDOW = 60 * 1000; // 1 menit dalam ms
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const record = rateLimitMap.get(ip);
-
-  if (!record || now > record.resetAt) {
-    // Reset window
-    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW });
-    return true;
-  }
-
-  if (record.count >= RATE_LIMIT) return false;
-
-  record.count++;
-  return true;
-}
+const MAX_HISTORY = 20; // batasi konteks agar biaya token terkendali
 
 function buildChatHistory(history: ChatHistory[], systemPrompt: string): ChatHistory[] {
   return [
@@ -73,14 +54,9 @@ function splitTextIntoChunks(text: string, chunkSize = 48) {
 export async function POST(req: NextRequest) {
   try {
     // ─── Rate Limiting ───
-    const ip =
-      req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
-
-    if (!checkRateLimit(ip)) {
-      return NextResponse.json(
-        { error: "Terlalu banyak request. Coba lagi dalam 1 menit." },
-        { status: 429 }
-      );
+    const rl = rateLimit(`chat:${clientIp(req)}`, 20, 60_000);
+    if (!rl.ok) {
+      return tooMany(rl.retryAfterSec, "Terlalu banyak request. Coba lagi dalam 1 menit.");
     }
 
     // ─── Parse Request Body ───
@@ -105,9 +81,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Batasi history: array valid + hanya N turn terakhir.
+    const safeHistory = Array.isArray(history) ? history.slice(-MAX_HISTORY) : [];
+
     // ─── Build System Prompt ───
     const systemPrompt = buildSystemPrompt();
-    const geminiHistory = buildChatHistory(history, systemPrompt);
+    const geminiHistory = buildChatHistory(safeHistory, systemPrompt);
     const { result, modelName } = await withGeminiModelFallback(async (selectedModel) => {
       const chat = getGeminiModel(selectedModel).startChat({ history: geminiHistory });
       return chat.sendMessage(message);
