@@ -214,6 +214,14 @@ const id = {
     topServices: "Jasa Terlaris",
     noData: "Belum ada data.",
   },
+  verify: {
+    bannerTitle: "Verifikasi email kamu",
+    bannerDesc:
+      "Kami sudah mengirim link verifikasi ke emailmu. Cek inbox (atau folder spam) untuk menyelesaikan.",
+    resend: "Kirim ulang",
+    sent: "Email verifikasi terkirim.",
+    dismiss: "Tutup",
+  },
 };
 
 const en: typeof id = {
@@ -419,6 +427,14 @@ const en: typeof id = {
     ordersByStatus: "Orders by Status",
     topServices: "Top Services",
     noData: "No data yet.",
+  },
+  verify: {
+    bannerTitle: "Verify your email",
+    bannerDesc:
+      "We've sent a verification link to your email. Check your inbox (or spam) to finish setting up.",
+    resend: "Resend",
+    sent: "Verification email sent.",
+    dismiss: "Dismiss",
   },
 };
 

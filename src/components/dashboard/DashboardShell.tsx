@@ -6,6 +6,7 @@ import { Home, LayoutDashboard, PlusCircle, ShieldCheck, Users, BarChart3, type 
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/Navbar";
 import { useLang } from "@/components/LangProvider";
+import { VerifyBanner } from "@/components/dashboard/VerifyBanner";
 
 interface NavItem {
   href: string;
@@ -15,9 +16,11 @@ interface NavItem {
 
 export function DashboardShell({
   variant = "user",
+  showVerify = false,
   children,
 }: {
   variant?: "user" | "admin";
+  showVerify?: boolean;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -117,7 +120,10 @@ export function DashboardShell({
 
       {/* Content */}
       <main className="md:ml-60">
-        <div className="mx-auto max-w-4xl px-5 py-8 md:px-10 md:py-10">{children}</div>
+        <div className="mx-auto max-w-4xl px-5 py-8 md:px-10 md:py-10">
+          {showVerify && <VerifyBanner />}
+          {children}
+        </div>
       </main>
     </div>
   );
