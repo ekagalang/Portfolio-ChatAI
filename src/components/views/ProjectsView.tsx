@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Star, GitFork, ExternalLink, Github,
@@ -138,10 +139,12 @@ export function ProjectsView({ language }: Props) {
             onMouseLeave={(e) => (e.currentTarget.style.borderColor = "hsl(var(--border))")}
           >
             {/* Avatar */}
-            <img
+            <Image
               src={githubProfile.avatar_url}
               alt={githubProfile.login}
-              style={{ width: "40px", height: "40px", borderRadius: "10px", flexShrink: 0 }}
+              width={40}
+              height={40}
+              style={{ borderRadius: "10px", flexShrink: 0 }}
             />
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontSize: "13px", fontWeight: 600, color: "hsl(var(--foreground))", margin: "0 0 2px", fontFamily: "var(--font-geist-mono)" }}>
