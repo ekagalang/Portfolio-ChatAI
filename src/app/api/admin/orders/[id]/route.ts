@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import {
   getOrderById,
   setQuote,
@@ -7,18 +8,27 @@ import {
   updateProgress,
 } from "@/lib/orders";
 import { sendQuoteToCustomer, sendSettlementInvoice } from "@/lib/email";
+import { logAudit } from "@/lib/audit";
 
 export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const session = await auth();
   if (!session?.user || session.user.role !== "admin") {
     return NextResponse.json({ error: "Akses ditolak" }, { status: 403 });
   }
+  const actor = { actorId: session.user.id, actorEmail: session.user.email ?? "?" };
 
   const { id } = await ctx.params;
 
   try {
     const body = await req.json();
     const action = body.action as string;
+
+    // Konteks untuk audit (email customer + status lama).
+    const meta = await prisma.order.findUnique({
+      where: { id },
+      select: { status: true, user: { select: { email: true } } },
+    });
+    const targetEmail = meta?.user.email;
 
     if (action === "quote") {
       const agreedTotal = Math.round(Number(body.agreedTotal));
@@ -38,16 +48,39 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
           dpAmount,
         });
       }
+      void logAudit({
+        ...actor,
+        action: "order_quote",
+        targetId: id,
+        targetEmail,
+        detail: `Total ${agreedTotal.toLocaleString("id-ID")} · DP ${dpAmount.toLocaleString("id-ID")}`,
+      });
       return NextResponse.json({ ok: true });
     }
 
     if (action === "status") {
-      await updateStatus(id, String(body.status));
+      const next = String(body.status);
+      await updateStatus(id, next);
+      void logAudit({
+        ...actor,
+        action: "order_status",
+        targetId: id,
+        targetEmail,
+        detail: `${meta?.status ?? "?"} → ${next}`,
+      });
       return NextResponse.json({ ok: true });
     }
 
     if (action === "progress") {
-      await updateProgress(id, Number(body.progressPct), body.progressNote);
+      const pct = Number(body.progressPct);
+      await updateProgress(id, pct, body.progressNote);
+      void logAudit({
+        ...actor,
+        action: "order_progress",
+        targetId: id,
+        targetEmail,
+        detail: `${Math.max(0, Math.min(100, Math.round(pct)))}%`,
+      });
       return NextResponse.json({ ok: true });
     }
 
@@ -64,13 +97,19 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
           remaining,
         });
       }
+      void logAudit({
+        ...actor,
+        action: "order_issue_settlement",
+        targetId: id,
+        targetEmail,
+      });
       return NextResponse.json({ ok: true });
     }
 
     return NextResponse.json({ error: "Aksi tidak dikenal" }, { status: 400 });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Gagal memproses";
     console.error("[admin/orders PATCH]", err);
-    return NextResponse.json({ error: msg }, { status: 400 });
+    // Jangan bocorkan pesan error internal ke client.
+    return NextResponse.json({ error: "Gagal memproses permintaan" }, { status: 400 });
   }
 }
