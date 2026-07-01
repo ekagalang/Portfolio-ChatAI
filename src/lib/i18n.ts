@@ -133,6 +133,9 @@ const id = {
   pay: {
     processing: "Memproses…",
     failed: "Pembayaran gagal",
+    installment: "Bayar sebagian (cicil)",
+    amountUpTo: "Nominal (maks {max})",
+    amountInvalid: "Nominal harus 1 sampai sisa tagihan.",
   },
   users: {
     title: "Kelola User",
@@ -399,6 +402,9 @@ const en: typeof id = {
   pay: {
     processing: "Processing…",
     failed: "Payment failed",
+    installment: "Pay partially (installment)",
+    amountUpTo: "Amount (max {max})",
+    amountInvalid: "Amount must be between 1 and the outstanding balance.",
   },
   users: {
     title: "User Management",

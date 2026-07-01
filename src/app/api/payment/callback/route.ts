@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
     const status = mapTransactionStatus(transaction_status, fraud_status);
 
-    const { firstSuccess, type, orderId } = await applyWebhook({
+    const { firstSuccess, type, orderId, amount: paidAmount } = await applyWebhook({
       midtransOrderId: order_id,
       transactionId: transaction_id,
       transactionStatus: transaction_status,
@@ -43,10 +43,8 @@ export async function POST(req: NextRequest) {
     if (firstSuccess && orderId && type) {
       const order = await getOrderById(orderId);
       if (order) {
-        const amount =
-          type === "dp"
-            ? order.dpAmount ?? 0
-            : (order.agreedTotal ?? 0) - (order.dpAmount ?? 0);
+        // Nominal aktual pembayaran ini (mendukung cicilan pelunasan).
+        const amount = paidAmount ?? (type === "dp" ? order.dpAmount ?? 0 : 0);
         void sendPaymentReceived({
           to: order.user.email,
           customerName: order.user.name ?? order.user.email,

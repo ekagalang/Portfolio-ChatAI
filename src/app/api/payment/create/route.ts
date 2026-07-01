@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { createSnapTransaction } from "@/lib/midtrans";
-import { getOrderForUser, createPaymentRecord } from "@/lib/orders";
+import { getOrderForUser, createPaymentRecord, outstandingAmount } from "@/lib/orders";
 import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { orderId, type } = await req.json();
+    const { orderId, type, amount: amountInput } = await req.json();
     if (type !== "dp" && type !== "settlement") {
       return NextResponse.json({ error: "Tipe pembayaran tidak valid" }, { status: 400 });
     }
@@ -37,7 +37,23 @@ export async function POST(req: NextRequest) {
       if (order.status !== "awaiting_settlement") {
         return NextResponse.json({ error: "Pelunasan belum bisa dibayar" }, { status: 400 });
       }
-      amount = (order.agreedTotal ?? 0) - (order.dpAmount ?? 0);
+      // Cicilan: sisa tagihan dihitung server-side. Client boleh minta bayar
+      // sebagian (amountInput), default = seluruh sisa. Tak boleh > sisa.
+      const outstanding = outstandingAmount(order);
+      if (outstanding <= 0) {
+        return NextResponse.json({ error: "Order sudah lunas" }, { status: 400 });
+      }
+      if (amountInput == null) {
+        amount = outstanding;
+      } else {
+        amount = Math.round(Number(amountInput));
+        if (!Number.isFinite(amount) || amount <= 0) {
+          return NextResponse.json({ error: "Nominal tidak valid" }, { status: 400 });
+        }
+        if (amount > outstanding) {
+          return NextResponse.json({ error: "Nominal melebihi sisa tagihan" }, { status: 400 });
+        }
+      }
     }
 
     if (amount <= 0) {

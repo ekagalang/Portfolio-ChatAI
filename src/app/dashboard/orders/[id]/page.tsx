@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronLeft, MessageCircle, FileText } from "lucide-react";
 import { requireUser } from "@/lib/session";
-import { getOrderForUser } from "@/lib/orders";
+import { getOrderForUser, paidSoFar } from "@/lib/orders";
 import { formatIDR, cn, orderLabel } from "@/lib/utils";
 import { ORDER_LIFECYCLE, ORDER_STATUS_LABEL } from "@/lib/payment-config";
 import { getLang } from "@/lib/i18n.server";
@@ -24,7 +24,8 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const tt = t(lang);
   const total = order.agreedTotal ?? 0;
   const dp = order.dpAmount ?? 0;
-  const remaining = Math.max(0, total - dp);
+  const paid = paidSoFar(order.payments);
+  const remaining = Math.max(0, total - paid);
   const currentIdx = ORDER_LIFECYCLE.indexOf(order.status as (typeof ORDER_LIFECYCLE)[number]);
   const isCancelled = order.status === "cancelled";
 
@@ -115,6 +116,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               <div className="divide-y divide-border">
                 <Row label={tt.order.agreedTotal} value={formatIDR(total)} />
                 <Row label={tt.order.dp} value={<span>{formatIDR(dp)}{order.status !== "quoted" && <span className="ml-1 text-accent">✓</span>}</span>} />
+                <Row label={tt.invoice.paidSoFar} value={formatIDR(paid)} />
                 <Row label={tt.order.remaining} value={formatIDR(remaining)} />
               </div>
             )}
@@ -126,7 +128,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             )}
             {order.status === "awaiting_settlement" && (
               <div className="mt-4">
-                <PayButton orderId={order.id} type="settlement" amount={remaining} label={tt.order.paySettlement} />
+                <PayButton orderId={order.id} type="settlement" amount={remaining} label={tt.order.paySettlement} allowPartial />
               </div>
             )}
           </Panel>

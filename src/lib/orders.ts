@@ -19,6 +19,23 @@ export function mapTransactionStatus(
   return "pending";
 }
 
+// ───────────────── Helper nominal (cicilan) ─────────────────
+
+type PayLike = { grossAmount: number; paidAt: Date | null };
+
+/** Total nominal yang sudah lunas (DP + pelunasan yang paidAt terisi). */
+export function paidSoFar(payments: PayLike[]): number {
+  return payments.filter((p) => p.paidAt).reduce((s, p) => s + p.grossAmount, 0);
+}
+
+/** Sisa tagihan = agreedTotal − yang sudah dibayar (min 0). */
+export function outstandingAmount(order: {
+  agreedTotal: number | null;
+  payments: PayLike[];
+}): number {
+  return Math.max(0, (order.agreedTotal ?? 0) - paidSoFar(order.payments));
+}
+
 // ───────────────── Fase 1: customer ─────────────────
 
 export async function createOrderRequest(input: {
@@ -136,7 +153,13 @@ export async function applyWebhook(params: {
   paymentType?: string;
   status: PaymentStatus;
   grossAmount: number; // rupiah dari notifikasi (sudah di-parse)
-}): Promise<{ firstSuccess: boolean; type?: string; orderId?: string; amountMismatch?: boolean }> {
+}): Promise<{
+  firstSuccess: boolean;
+  type?: string;
+  orderId?: string;
+  amountMismatch?: boolean;
+  amount?: number;
+}> {
   const { midtransOrderId, transactionId, transactionStatus, paymentType, status, grossAmount } =
     params;
 
@@ -172,17 +195,26 @@ export async function applyWebhook(params: {
 
       const order = await tx.order.findUnique({
         where: { id: payment.orderId },
-        select: { status: true },
+        select: { status: true, agreedTotal: true },
       });
       if (payment.type === "dp" && order?.status === "quoted") {
         await tx.order.update({ where: { id: payment.orderId }, data: { status: "dp_paid" } });
       } else if (payment.type === "settlement" && order?.status === "awaiting_settlement") {
-        await tx.order.update({ where: { id: payment.orderId }, data: { status: "completed" } });
+        // Cicilan pelunasan: order selesai HANYA bila akumulasi yang dibayar
+        // (DP + semua pelunasan) sudah menutup agreedTotal. Bila belum, tetap
+        // awaiting_settlement agar cicilan berikutnya bisa dibayar.
+        const paid = await tx.payment.aggregate({
+          where: { orderId: payment.orderId, paidAt: { not: null } },
+          _sum: { grossAmount: true },
+        });
+        if ((paid._sum.grossAmount ?? 0) >= (order.agreedTotal ?? 0)) {
+          await tx.order.update({ where: { id: payment.orderId }, data: { status: "completed" } });
+        }
       }
       return true;
     });
 
-    return { firstSuccess: claimed, type: payment.type, orderId: payment.orderId };
+    return { firstSuccess: claimed, type: payment.type, orderId: payment.orderId, amount: payment.grossAmount };
   }
 
   // Status non-sukses (pending/failed): perbarui field transaksi, jangan sentuh paidAt.
@@ -190,5 +222,5 @@ export async function applyWebhook(params: {
     where: { midtransOrderId },
     data: { transactionId, transactionStatus, paymentType },
   });
-  return { firstSuccess: false, type: payment.type, orderId: payment.orderId };
+  return { firstSuccess: false, type: payment.type, orderId: payment.orderId, amount: payment.grossAmount };
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { mapTransactionStatus } from "@/lib/orders";
+import { mapTransactionStatus, paidSoFar, outstandingAmount } from "@/lib/orders";
 
 describe("mapTransactionStatus", () => {
   it("settlement → success", () => {
@@ -24,5 +24,27 @@ describe("mapTransactionStatus", () => {
   it("pending & status tak dikenal → pending", () => {
     expect(mapTransactionStatus("pending")).toBe("pending");
     expect(mapTransactionStatus("whatever")).toBe("pending");
+  });
+});
+
+describe("paidSoFar / outstandingAmount (cicilan)", () => {
+  const d = new Date();
+  it("hanya menjumlah pembayaran yang paidAt terisi", () => {
+    const payments = [
+      { grossAmount: 1_500_000, paidAt: d }, // DP lunas
+      { grossAmount: 1_000_000, paidAt: d }, // cicilan 1 lunas
+      { grossAmount: 2_500_000, paidAt: null }, // pending
+    ];
+    expect(paidSoFar(payments)).toBe(2_500_000);
+    expect(outstandingAmount({ agreedTotal: 5_000_000, payments })).toBe(2_500_000);
+  });
+
+  it("sisa tidak pernah negatif (overpay diclamp)", () => {
+    const payments = [{ grossAmount: 6_000_000, paidAt: d }];
+    expect(outstandingAmount({ agreedTotal: 5_000_000, payments })).toBe(0);
+  });
+
+  it("agreedTotal null → sisa 0", () => {
+    expect(outstandingAmount({ agreedTotal: null, payments: [] })).toBe(0);
   });
 });
