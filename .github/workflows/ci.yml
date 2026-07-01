@@ -9,11 +9,24 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     env:
-      # Dummy values — cukup agar `prisma generate` & `next build` jalan di CI.
-      # Bukan secret asli; jangan dipakai di produksi.
-      DATABASE_URL: "file:./ci.db"
+      # Dummy values — cukup agar prisma/next jalan di CI. Bukan secret asli.
+      DATABASE_URL: "postgresql://ci:ci@localhost:5432/ci?schema=public"
       AUTH_SECRET: "ci-dummy-secret-not-for-production-32chars"
       NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
 
@@ -26,6 +39,10 @@ jobs:
 
       # Prisma Client harus di-generate sebelum typecheck/build.
       - run: npx prisma generate
+
+      # Terapkan skema ke Postgres CI agar build/route yang butuh DB tidak gagal.
+      - name: Migrate (deploy)
+        run: npx prisma migrate deploy
 
       - name: Lint
         run: npm run lint
