@@ -79,9 +79,12 @@ GITHUB_USERNAME=ekagalang
 RESEND_API_KEY=...
 CONTACT_EMAIL=...
 FROM_EMAIL=...
-MIDTRANS_SERVER_KEY=...        # sandbox dulu
-MIDTRANS_CLIENT_KEY=...
+MIDTRANS_SERVER_KEY=...                 # sandbox dulu
+NEXT_PUBLIC_MIDTRANS_CLIENT_KEY=...     # di-inline saat build (Snap) → jadi build arg
 ```
+
+> `NEXT_PUBLIC_*` (client key, app url, umami) di-*inline* saat `next build`,
+> jadi di-pass sebagai **build arg** oleh `compose.yml` dari `.env.production`.
 
 Opsional: `ADMIN_EMAILS`, `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`,
 `MIDTRANS_ENV` (`sandbox`|`production`), `REDIS_URL=redis://redis_cache:6379`,
