@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useLang } from "@/components/LangProvider";
 
 const fieldCls =
   "w-full rounded-lg border border-border bg-surface-2 px-3 py-2 font-mono text-sm text-foreground outline-none transition focus:border-accent/50";
@@ -26,6 +27,8 @@ export function AdminOrderActions({
   progressNote: string | null;
 }) {
   const router = useRouter();
+  const { t } = useLang();
+  const ta = t.actions;
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -45,7 +48,7 @@ export function AdminOrderActions({
     const data = await res.json().catch(() => ({}));
     setBusy(false);
     if (!res.ok) {
-      setError(data.error ?? "Gagal");
+      setError(data.error ?? ta.failed);
       return;
     }
     router.refresh();
@@ -61,19 +64,19 @@ export function AdminOrderActions({
       {/* Tetapkan harga */}
       {status === "requested" && (
         <div className={cardCls}>
-          <p className={headCls}>Tetapkan Harga</p>
+          <p className={headCls}>{ta.setPrice}</p>
           <div className="mb-3 grid grid-cols-2 gap-3">
             <div>
-              <label className={labelCls}>Total kesepakatan</label>
+              <label className={labelCls}>{ta.agreedTotal}</label>
               <input className={fieldCls} type="number" value={total} onChange={(e) => setTotal(e.target.value)} placeholder="5000000" />
             </div>
             <div>
-              <label className={labelCls}>DP</label>
+              <label className={labelCls}>{ta.dp}</label>
               <input className={fieldCls} type="number" value={dp} onChange={(e) => setDp(e.target.value)} placeholder="1500000" />
             </div>
           </div>
           <button className={primary} disabled={busy} onClick={() => call({ action: "quote", agreedTotal: Number(total), dpAmount: Number(dp) })}>
-            Kirim Penawaran
+            {ta.sendQuote}
           </button>
         </div>
       )}
@@ -81,9 +84,9 @@ export function AdminOrderActions({
       {/* Mulai pengerjaan */}
       {status === "dp_paid" && (
         <div className={cardCls}>
-          <p className={headCls}>Pengerjaan</p>
+          <p className={headCls}>{ta.work}</p>
           <button className={primary} disabled={busy} onClick={() => call({ action: "status", status: "in_progress" })}>
-            Mulai Pengerjaan
+            {ta.startWork}
           </button>
         </div>
       )}
@@ -91,15 +94,15 @@ export function AdminOrderActions({
       {/* Progress + pelunasan */}
       {status === "in_progress" && (
         <div className={cardCls}>
-          <p className={headCls}>Progress</p>
-          <label className={labelCls}>Persentase ({pct}%)</label>
+          <p className={headCls}>{ta.progress}</p>
+          <label className={labelCls}>{ta.percentage(Number(pct) || 0)}</label>
           <input className={cn(fieldCls, "mb-3")} type="number" min={0} max={100} value={pct} onChange={(e) => setPct(e.target.value)} />
-          <label className={labelCls}>Catatan progress</label>
+          <label className={labelCls}>{ta.progressNote}</label>
           <textarea
             className={cn(fieldCls, "mb-3 min-h-[72px] resize-y leading-relaxed")}
             value={note}
             onChange={(e) => setNote(e.target.value)}
-            placeholder="Mis. Desain selesai, mulai development backend..."
+            placeholder={ta.progressNotePh}
           />
           <div className="flex gap-2">
             <button
@@ -107,10 +110,10 @@ export function AdminOrderActions({
               disabled={busy}
               onClick={() => call({ action: "progress", progressPct: Number(pct), progressNote: note })}
             >
-              Simpan
+              {ta.save}
             </button>
             <button className={cn(primary, "flex-1")} disabled={busy} onClick={() => call({ action: "issue_settlement" })}>
-              Terbitkan Pelunasan
+              {ta.issueSettlement}
             </button>
           </div>
         </div>
@@ -124,14 +127,14 @@ export function AdminOrderActions({
             disabled={busy}
             onClick={() => call({ action: "status", status: "cancelled" })}
           >
-            Batalkan Order
+            {ta.cancelOrder}
           </button>
         </div>
       )}
 
       {status === "completed" && (
         <div className={cn(cardCls, "text-center")}>
-          <p className="font-mono text-sm text-accent">✓ Order selesai</p>
+          <p className="font-mono text-sm text-accent">{ta.orderDone}</p>
         </div>
       )}
     </div>

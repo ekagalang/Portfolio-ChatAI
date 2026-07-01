@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CreditCard, Loader2 } from "lucide-react";
 import { formatIDR } from "@/lib/utils";
+import { useLang } from "@/components/LangProvider";
 import type { MidtransSnapResult } from "@/types/payment";
 
 declare global {
@@ -34,6 +35,7 @@ export function PayButton({
   label: string;
 }) {
   const router = useRouter();
+  const { t } = useLang();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,7 +50,7 @@ export function PayButton({
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Gagal memproses pembayaran");
+        setError(data.error ?? t.pay.failed);
         setLoading(false);
         return;
       }
@@ -63,7 +65,7 @@ export function PayButton({
           onSuccess: done,
           onPending: done,
           onError: () => {
-            setError("Pembayaran gagal");
+            setError(t.pay.failed);
             setLoading(false);
           },
           onClose: () => setLoading(false),
@@ -73,7 +75,7 @@ export function PayButton({
         setLoading(false);
       }
     } catch {
-      setError("Koneksi gagal, coba lagi");
+      setError(t.common.connError);
       setLoading(false);
     }
   };
@@ -86,7 +88,7 @@ export function PayButton({
         className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-3 font-mono text-sm font-semibold text-accent-foreground shadow-[0_0_16px_hsl(var(--accent-glow))] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {loading ? <Loader2 className="size-4 animate-spin" /> : <CreditCard className="size-4" />}
-        {loading ? "Memproses..." : `${label} ${formatIDR(amount)}`}
+        {loading ? t.pay.processing : `${label} ${formatIDR(amount)}`}
       </button>
       {error && <p className="mt-2 font-mono text-xs text-red-400">{error}</p>}
     </div>

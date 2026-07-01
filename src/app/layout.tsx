@@ -3,6 +3,8 @@ import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Providers } from "@/components/Providers";
+import { LangProvider } from "@/components/LangProvider";
+import { getLang } from "@/lib/i18n.server";
 import "./globals.css";
 
 const BASE_URL = "https://ekagalang.my.id";
@@ -115,11 +117,12 @@ export const metadata: Metadata = {
   // },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const lang = await getLang();
   const umamiId  = process.env.NEXT_PUBLIC_UMAMI_ID;
   const umamiUrl = process.env.NEXT_PUBLIC_UMAMI_URL;
   const midtransClientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY;
@@ -145,7 +148,9 @@ export default function RootLayout({
       </head>
       <body className={`${GeistSans.variable} ${GeistMono.variable}`}>
         <Providers>
-          <ThemeProvider>{children}</ThemeProvider>
+          <LangProvider initial={lang}>
+            <ThemeProvider>{children}</ThemeProvider>
+          </LangProvider>
         </Providers>
       </body>
     </html>

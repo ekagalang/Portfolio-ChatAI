@@ -4,6 +4,8 @@ import { ChevronLeft } from "lucide-react";
 import { requireAdmin } from "@/lib/session";
 import { getOrderById } from "@/lib/orders";
 import { formatIDR } from "@/lib/utils";
+import { getLang } from "@/lib/i18n.server";
+import { t } from "@/lib/i18n";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { AdminOrderActions } from "@/components/admin/AdminOrderActions";
 import { Panel, SectionLabel, Row } from "@/components/dashboard/ui";
@@ -17,13 +19,14 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
   const order = await getOrderById(id);
   if (!order) notFound();
 
+  const tt = t(await getLang());
   const total = order.agreedTotal ?? 0;
   const dp = order.dpAmount ?? 0;
 
   return (
     <>
       <Link href="/admin" className="mb-5 inline-flex items-center gap-1 font-mono text-xs text-muted-foreground transition hover:text-foreground">
-        <ChevronLeft className="size-3.5" /> Kelola Order
+        <ChevronLeft className="size-3.5" /> {tt.nav.admin}
       </Link>
 
       <div className="mb-6 flex items-start justify-between gap-3">
@@ -38,38 +41,38 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
         {/* Left: info */}
         <div className="space-y-4 lg:col-span-3">
           <Panel className="p-5">
-            <SectionLabel>Customer</SectionLabel>
+            <SectionLabel>{tt.admin.customer}</SectionLabel>
             <div className="divide-y divide-border">
-              <Row label="Nama" value={order.user.name ?? "—"} />
-              <Row label="Email" value={order.user.email} />
-              {order.phone && <Row label="No. HP" value={order.phone} />}
+              <Row label={tt.admin.name} value={order.user.name ?? "—"} />
+              <Row label={tt.admin.email} value={order.user.email} />
+              {order.phone && <Row label={tt.admin.phone} value={order.phone} />}
             </div>
           </Panel>
 
           <Panel className="p-5">
-            <SectionLabel>Brief</SectionLabel>
+            <SectionLabel>{tt.order.brief}</SectionLabel>
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{order.brief}</p>
           </Panel>
 
           {order.agreedTotal != null && (
             <Panel className="p-5">
-              <SectionLabel>Harga</SectionLabel>
+              <SectionLabel>{tt.admin.price}</SectionLabel>
               <div className="divide-y divide-border">
-                <Row label="Total" value={formatIDR(total)} />
-                <Row label="DP" value={formatIDR(dp)} />
-                <Row label="Sisa" value={formatIDR(Math.max(0, total - dp))} />
+                <Row label={tt.common.total} value={formatIDR(total)} />
+                <Row label={tt.common.dp} value={formatIDR(dp)} />
+                <Row label={tt.admin.remaining} value={formatIDR(Math.max(0, total - dp))} />
               </div>
             </Panel>
           )}
 
           {order.payments.length > 0 && (
             <Panel className="p-5">
-              <SectionLabel>Pembayaran</SectionLabel>
+              <SectionLabel>{tt.order.payment}</SectionLabel>
               <div className="divide-y divide-border">
                 {order.payments.map((pm) => (
                   <Row
                     key={pm.id}
-                    label={`${pm.type === "dp" ? "DP" : "Pelunasan"} · ${pm.paidAt ? "lunas" : pm.transactionStatus}`}
+                    label={`${pm.type === "dp" ? tt.common.dp : tt.order.settlement} · ${pm.paidAt ? tt.common.paid : pm.transactionStatus}`}
                     value={formatIDR(pm.grossAmount)}
                   />
                 ))}

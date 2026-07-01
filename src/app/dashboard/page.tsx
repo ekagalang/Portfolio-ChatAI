@@ -4,6 +4,8 @@ import { ArrowRight } from "lucide-react";
 import { requireUser } from "@/lib/session";
 import { getUserOrders } from "@/lib/orders";
 import { formatIDR } from "@/lib/utils";
+import { getLang } from "@/lib/i18n.server";
+import { dateLocale, t } from "@/lib/i18n";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { PageHeader, StatCard, Panel, EmptyState, btnPrimary } from "@/components/dashboard/ui";
 
@@ -18,6 +20,9 @@ export default async function DashboardPage() {
   if (user.role === "admin") redirect("/admin");
   const orders = await getUserOrders(user.id);
 
+  const lang = await getLang();
+  const tt = t(lang);
+
   const active = orders.filter((o) => ACTIVE.includes(o.status)).length;
   const completed = orders.filter((o) => o.status === "completed").length;
   const totalPaid = orders
@@ -28,35 +33,35 @@ export default async function DashboardPage() {
   return (
     <>
       <PageHeader
-        title={`Halo, ${(user.name ?? user.email ?? "").split(" ")[0]} 👋`}
-        subtitle="Pantau pesanan, status pengerjaan, dan pembayaranmu di sini."
+        title={tt.dash.greeting((user.name ?? user.email ?? "").split(" ")[0])}
+        subtitle={tt.dash.subtitle}
         action={
-          <Link href="/services" className={btnPrimary}>
-            + Pesan jasa baru
+          <Link href="/dashboard/pesan" className={btnPrimary}>
+            {tt.common.newOrder}
           </Link>
         }
       />
 
       {/* Stats */}
       <div className="mb-7 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard label="Total Order" value={String(orders.length)} />
-        <StatCard label="Sedang Aktif" value={String(active)} />
-        <StatCard label="Selesai" value={String(completed)} />
-        <StatCard label="Total Dibayar" value={formatIDR(totalPaid)} />
+        <StatCard label={tt.dash.totalOrder} value={String(orders.length)} />
+        <StatCard label={tt.dash.active} value={String(active)} />
+        <StatCard label={tt.dash.done} value={String(completed)} />
+        <StatCard label={tt.dash.paidTotal} value={formatIDR(totalPaid)} />
       </div>
 
       {/* Orders */}
       <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-        Pesanan
+        {tt.dash.orders}
       </p>
 
       {orders.length === 0 ? (
         <EmptyState
-          title="Belum ada pesanan"
-          desc="Mulai dengan memilih jasa yang kamu butuhkan. Saya akan kirim penawaran harga setelah diskusi."
+          title={tt.dash.emptyTitle}
+          desc={tt.dash.emptyDesc}
           action={
-            <Link href="/services" className={btnPrimary}>
-              Lihat jasa
+            <Link href="/dashboard/pesan" className={btnPrimary}>
+              {tt.common.viewServices}
             </Link>
           }
         />
@@ -69,7 +74,7 @@ export default async function DashboardPage() {
                   <div className="min-w-0">
                     <p className="truncate text-sm font-semibold text-foreground">{o.serviceTitle}</p>
                     <p className="mt-1 font-mono text-[11px] text-muted-foreground">
-                      {new Date(o.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                      {new Date(o.createdAt).toLocaleDateString(dateLocale(lang), { day: "numeric", month: "short", year: "numeric" })}
                       {" · "}#{o.id.slice(-6)}
                     </p>
                   </div>
@@ -78,12 +83,12 @@ export default async function DashboardPage() {
                 <div className="mt-3 flex items-center justify-between">
                   {o.agreedTotal != null ? (
                     <p className="font-mono text-xs text-muted-foreground">
-                      Total <span className="text-foreground">{formatIDR(o.agreedTotal)}</span>
-                      {" · DP "}
+                      {tt.common.total} <span className="text-foreground">{formatIDR(o.agreedTotal)}</span>
+                      {` · ${tt.common.dp} `}
                       <span className="text-foreground">{formatIDR(o.dpAmount ?? 0)}</span>
                     </p>
                   ) : (
-                    <p className="font-mono text-xs text-muted-foreground">Menunggu penawaran</p>
+                    <p className="font-mono text-xs text-muted-foreground">{tt.common.awaitingQuote}</p>
                   )}
                   <ArrowRight className="size-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-accent" />
                 </div>

@@ -5,6 +5,8 @@ import { requireUser } from "@/lib/session";
 import { getOrderForUser } from "@/lib/orders";
 import { formatIDR, cn } from "@/lib/utils";
 import { ORDER_LIFECYCLE, ORDER_STATUS_LABEL } from "@/lib/payment-config";
+import { getLang } from "@/lib/i18n.server";
+import { t } from "@/lib/i18n";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { PayButton } from "@/components/dashboard/PayButton";
 import { Panel, SectionLabel, Row } from "@/components/dashboard/ui";
@@ -18,6 +20,8 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const order = await getOrderForUser(id, user.id);
   if (!order) notFound();
 
+  const lang = await getLang();
+  const tt = t(lang);
   const total = order.agreedTotal ?? 0;
   const dp = order.dpAmount ?? 0;
   const remaining = Math.max(0, total - dp);
@@ -27,7 +31,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   return (
     <>
       <Link href="/dashboard" className="mb-5 inline-flex items-center gap-1 font-mono text-xs text-muted-foreground transition hover:text-foreground">
-        <ChevronLeft className="size-3.5" /> Dashboard
+        <ChevronLeft className="size-3.5" /> {tt.nav.dashboard}
       </Link>
 
       <div className="mb-6 flex items-start justify-between gap-3">
@@ -43,7 +47,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         <div className="space-y-4 lg:col-span-3">
           {!isCancelled && (
             <Panel className="p-5">
-              <SectionLabel>Progres</SectionLabel>
+              <SectionLabel>{tt.order.progress}</SectionLabel>
               <ol className="relative">
                 {ORDER_LIFECYCLE.map((step, i) => {
                   const done = i <= currentIdx;
@@ -69,7 +73,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                         {done ? "✓" : i + 1}
                       </span>
                       <span className={cn("pt-0.5 text-sm", done ? "text-foreground" : "text-muted-foreground")}>
-                        {ORDER_STATUS_LABEL[step]?.id ?? step}
+                        {ORDER_STATUS_LABEL[step]?.[lang] ?? step}
                       </span>
                     </li>
                   );
@@ -79,7 +83,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               {order.status === "in_progress" && (
                 <div className="mt-4 border-t border-border pt-4">
                   <div className="mb-1.5 flex justify-between font-mono text-[11px] text-muted-foreground">
-                    <span>Pengerjaan</span>
+                    <span>{tt.order.working}</span>
                     <span className="tabular-nums text-foreground">{order.progressPct}%</span>
                   </div>
                   <div className="h-1.5 overflow-hidden rounded-full bg-surface-2">
@@ -94,7 +98,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
           )}
 
           <Panel className="p-5">
-            <SectionLabel>Brief</SectionLabel>
+            <SectionLabel>{tt.order.brief}</SectionLabel>
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{order.brief}</p>
           </Panel>
         </div>
@@ -102,39 +106,39 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
         {/* Right: pricing + actions */}
         <div className="space-y-4 lg:col-span-2">
           <Panel className="p-5">
-            <SectionLabel>Pembayaran</SectionLabel>
+            <SectionLabel>{tt.order.payment}</SectionLabel>
             {order.agreedTotal == null ? (
               <p className="text-xs leading-relaxed text-muted-foreground">
-                Menunggu penawaran harga. Saya akan meninjau permintaanmu dan mengirim harga + DP secepatnya.
+                {tt.order.awaitingQuoteLong}
               </p>
             ) : (
               <div className="divide-y divide-border">
-                <Row label="Harga kesepakatan" value={formatIDR(total)} />
-                <Row label="DP" value={<span>{formatIDR(dp)}{order.status !== "quoted" && <span className="ml-1 text-accent">✓</span>}</span>} />
-                <Row label="Sisa pelunasan" value={formatIDR(remaining)} />
+                <Row label={tt.order.agreedTotal} value={formatIDR(total)} />
+                <Row label={tt.order.dp} value={<span>{formatIDR(dp)}{order.status !== "quoted" && <span className="ml-1 text-accent">✓</span>}</span>} />
+                <Row label={tt.order.remaining} value={formatIDR(remaining)} />
               </div>
             )}
 
             {order.status === "quoted" && (
               <div className="mt-4">
-                <PayButton orderId={order.id} type="dp" amount={dp} label="Bayar DP" />
+                <PayButton orderId={order.id} type="dp" amount={dp} label={tt.order.payDp} />
               </div>
             )}
             {order.status === "awaiting_settlement" && (
               <div className="mt-4">
-                <PayButton orderId={order.id} type="settlement" amount={remaining} label="Bayar Pelunasan" />
+                <PayButton orderId={order.id} type="settlement" amount={remaining} label={tt.order.paySettlement} />
               </div>
             )}
           </Panel>
 
           {order.payments.length > 0 && (
             <Panel className="p-5">
-              <SectionLabel>Riwayat</SectionLabel>
+              <SectionLabel>{tt.order.history}</SectionLabel>
               <div className="divide-y divide-border">
                 {order.payments.map((pm) => (
                   <Row
                     key={pm.id}
-                    label={`${pm.type === "dp" ? "DP" : "Pelunasan"} · ${pm.paidAt ? "lunas" : pm.transactionStatus}`}
+                    label={`${pm.type === "dp" ? tt.common.dp : tt.order.settlement} · ${pm.paidAt ? tt.common.paid : pm.transactionStatus}`}
                     value={formatIDR(pm.grossAmount)}
                   />
                 ))}
@@ -148,7 +152,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
             rel="noreferrer"
             className="flex items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 py-3 font-mono text-xs text-muted-foreground transition hover:border-accent/40 hover:text-foreground"
           >
-            <MessageCircle className="size-4" /> Tanya soal order ini
+            <MessageCircle className="size-4" /> {tt.order.askAbout}
           </a>
         </div>
       </div>

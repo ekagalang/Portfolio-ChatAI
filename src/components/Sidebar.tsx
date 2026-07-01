@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   MessageSquare, FolderGit2, Briefcase, Mail,
-  ChevronRight, Globe, Download, Clock, Trash2,
+  ChevronRight, Clock, Trash2,
 } from "lucide-react";
 import { profile } from "@/data/profile";
 
@@ -22,8 +22,6 @@ interface Props {
   chatSessions: ChatSessionItem[];
   onClearHistory: () => void;
   language: "id" | "en";
-  onLanguageToggle: () => void;
-  onCVOpen: () => void; // ← prop baru
 }
 
 const NAV_ITEMS: {
@@ -41,8 +39,7 @@ const NAV_ITEMS: {
 export function Sidebar({
   activeView, onViewChange,
   chatSessions, onClearHistory,
-  language, onLanguageToggle,
-  onCVOpen,
+  language,
 }: Props) {
   const [collapsed, setCollapsed] = useState(false);
 
@@ -227,90 +224,6 @@ export function Sidebar({
       {/* spacer */}
       {(collapsed || activeView !== "chat") && <div style={{ flex: 1 }} />}
 
-      {/* ── Bottom Actions ── */}
-      <div style={{
-        padding: "8px",
-        borderTop: "1px solid hsl(var(--border))",
-        display: "flex", flexDirection: "column", gap: "4px",
-        flexShrink: 0,
-      }}>
-        {/* CV — buka modal preview */}
-        <button
-          onClick={onCVOpen}
-          title={collapsed ? "CV" : ""}
-          style={{
-            display: "flex", alignItems: "center", gap: "10px",
-            padding: collapsed ? "9px 0" : "9px 10px",
-            justifyContent: collapsed ? "center" : "flex-start",
-            borderRadius: "8px", width: "100%",
-            color: "hsl(var(--accent))",
-            fontSize: "12px", fontFamily: "var(--font-geist-mono)",
-            border: "1px solid hsl(var(--accent) / 0.2)",
-            background: "hsl(var(--accent) / 0.06)",
-            cursor: "pointer", transition: "all 0.15s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "hsl(var(--accent) / 0.12)";
-            e.currentTarget.style.borderColor = "hsl(var(--accent) / 0.4)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "hsl(var(--accent) / 0.06)";
-            e.currentTarget.style.borderColor = "hsl(var(--accent) / 0.2)";
-          }}
-        >
-          <Download size={14} style={{ flexShrink: 0 }} />
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.span
-                initial={false}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                Download CV
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </button>
-
-        {/* Language Toggle */}
-        <button
-          onClick={onLanguageToggle}
-          title={collapsed ? "Toggle language" : ""}
-          style={{
-            display: "flex", alignItems: "center", gap: "10px",
-            padding: collapsed ? "9px 0" : "9px 10px",
-            justifyContent: collapsed ? "center" : "flex-start",
-            borderRadius: "8px", width: "100%",
-            color: "hsl(var(--muted-foreground))",
-            background: "transparent", border: "none", cursor: "pointer",
-            fontSize: "12px", fontFamily: "var(--font-geist-mono)",
-            transition: "all 0.15s ease",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "hsl(var(--surface-2))";
-            e.currentTarget.style.color = "hsl(var(--foreground))";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-            e.currentTarget.style.color = "hsl(var(--muted-foreground))";
-          }}
-        >
-          <Globe size={14} style={{ flexShrink: 0 }} />
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.span
-                initial={false}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                {language === "id" ? "🇮🇩 Indonesia" : "🇺🇸 English"}
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </button>
-      </div>
     </motion.aside>
   );
 }

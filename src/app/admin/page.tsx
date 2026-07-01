@@ -4,6 +4,8 @@ import { requireAdmin } from "@/lib/session";
 import { listOrders } from "@/lib/orders";
 import { formatIDR, cn } from "@/lib/utils";
 import { ORDER_STATUS_LABEL } from "@/lib/payment-config";
+import { getLang } from "@/lib/i18n.server";
+import { dateLocale, t } from "@/lib/i18n";
 import { StatusBadge } from "@/components/dashboard/StatusBadge";
 import { PageHeader, StatCard, Panel, EmptyState } from "@/components/dashboard/ui";
 
@@ -18,6 +20,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   const { status } = await searchParams;
   const filter = status && status !== "all" ? status : undefined;
 
+  const lang = await getLang();
+  const tt = t(lang);
+
   const all = await listOrders();
   const orders = filter ? all.filter((o) => o.status === filter) : all;
 
@@ -30,13 +35,13 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <PageHeader title="Kelola Order" subtitle="Tinjau permintaan, tetapkan harga, dan pantau pembayaran." />
+      <PageHeader title={tt.admin.title} subtitle={tt.admin.subtitle} />
 
       <div className="mb-7 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard label="Total Order" value={String(all.length)} />
-        <StatCard label="Perlu Ditindak" value={String(needsAction)} hint="menunggu penawaran" />
-        <StatCard label="Sedang Aktif" value={String(active)} />
-        <StatCard label="Pendapatan" value={formatIDR(revenue)} />
+        <StatCard label={tt.admin.totalOrder} value={String(all.length)} />
+        <StatCard label={tt.admin.needAction} value={String(needsAction)} hint={tt.admin.needActionHint} />
+        <StatCard label={tt.admin.active} value={String(active)} />
+        <StatCard label={tt.admin.revenue} value={formatIDR(revenue)} />
       </div>
 
       {/* Filter tabs */}
@@ -54,14 +59,14 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                   : "border border-border text-muted-foreground hover:text-foreground"
               )}
             >
-              {f === "all" ? "Semua" : ORDER_STATUS_LABEL[f]?.id ?? f}
+              {f === "all" ? tt.admin.all : ORDER_STATUS_LABEL[f]?.[lang] ?? f}
             </Link>
           );
         })}
       </div>
 
       {orders.length === 0 ? (
-        <EmptyState title="Tidak ada order" desc="Belum ada order pada filter ini." />
+        <EmptyState title={tt.admin.emptyTitle} desc={tt.admin.emptyDesc} />
       ) : (
         <div className="space-y-3">
           {orders.map((o) => (
@@ -73,7 +78,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                     <p className="mt-1 truncate font-mono text-[11px] text-muted-foreground">
                       {o.user.name ?? o.user.email}
                       {" · "}
-                      {new Date(o.createdAt).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
+                      {new Date(o.createdAt).toLocaleDateString(dateLocale(lang), { day: "numeric", month: "short" })}
                     </p>
                   </div>
                   <StatusBadge status={o.status} />
@@ -82,12 +87,12 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                   <p className="font-mono text-xs text-muted-foreground">
                     {o.agreedTotal != null ? (
                       <>
-                        Total <span className="text-foreground">{formatIDR(o.agreedTotal)}</span>
-                        {" · DP "}
+                        {tt.common.total} <span className="text-foreground">{formatIDR(o.agreedTotal)}</span>
+                        {` · ${tt.common.dp} `}
                         <span className="text-foreground">{formatIDR(o.dpAmount ?? 0)}</span>
                       </>
                     ) : (
-                      "Belum ada harga"
+                      tt.admin.noPrice
                     )}
                   </p>
                   <ArrowRight className="size-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-accent" />

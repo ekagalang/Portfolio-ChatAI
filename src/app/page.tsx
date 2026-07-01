@@ -11,6 +11,7 @@ import { ProjectsView } from "@/components/views/ProjectsView";
 import { ServicesView } from "@/components/views/ServicesView";
 import { ContactView } from "@/components/views/ContactView";
 import { useIsMobile } from "@/hooks/useMediaQuery";
+import { useLang } from "@/components/LangProvider";
 import { ChatMessage } from "@/types/chat";
 
 const SESSION_KEY = "portfolio_chat_history";
@@ -39,7 +40,7 @@ const jsonLd = {
 
 export default function Home() {
   const [activeView, setActiveView]   = useState<SidebarView>("chat");
-  const [language, setLanguage]       = useState<"id" | "en">("id");
+  const { lang: language }            = useLang(); // sumber bahasa terpusat (cookie)
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [cvOpen, setCvOpen]           = useState(false);
   const isMobile                      = useIsMobile();
@@ -48,9 +49,6 @@ export default function Home() {
     setChatHistory([]);
     try { sessionStorage.removeItem(SESSION_KEY); } catch { /* skip */ }
   };
-
-  const handleLanguageToggle = () =>
-    setLanguage((l) => (l === "id" ? "en" : "id"));
 
   const chatSessions = chatHistory
     .filter((m) => m.role === "user")
@@ -76,7 +74,7 @@ export default function Home() {
         <Navbar
           language={language}
           onCVOpen={() => setCvOpen(true)}
-          onLanguageToggle={handleLanguageToggle}
+          showLangToggle
         />
 
         <div style={{
@@ -91,8 +89,6 @@ export default function Home() {
               chatSessions={chatSessions}
               onClearHistory={handleClearHistory}
               language={language}
-              onLanguageToggle={handleLanguageToggle}
-              onCVOpen={() => setCvOpen(true)}
             />
           )}
 

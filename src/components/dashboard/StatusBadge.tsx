@@ -1,5 +1,8 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { ORDER_STATUS_LABEL } from "@/lib/payment-config";
+import { useLang } from "@/components/LangProvider";
 
 const STYLES: Record<string, string> = {
   requested: "bg-muted text-muted-foreground",
@@ -12,8 +15,9 @@ const STYLES: Record<string, string> = {
 };
 
 export function StatusBadge({ status }: { status: string }) {
+  const { lang } = useLang();
   const cls = STYLES[status] ?? STYLES.requested;
-  const labelText = ORDER_STATUS_LABEL[status]?.id ?? status;
+  const labelText = ORDER_STATUS_LABEL[status]?.[lang] ?? status;
   return (
     <span
       className={cn(

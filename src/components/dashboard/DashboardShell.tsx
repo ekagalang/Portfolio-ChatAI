@@ -5,23 +5,13 @@ import { usePathname } from "next/navigation";
 import { Home, LayoutDashboard, PlusCircle, ShieldCheck, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Navbar } from "@/components/Navbar";
+import { useLang } from "@/components/LangProvider";
 
 interface NavItem {
   href: string;
   label: string;
   icon: LucideIcon;
 }
-
-const USER_NAV: NavItem[] = [
-  { href: "/", label: "Halaman Utama", icon: Home },
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/pesan", label: "Pesan Jasa", icon: PlusCircle },
-];
-
-const ADMIN_NAV: NavItem[] = [
-  { href: "/", label: "Halaman Utama", icon: Home },
-  { href: "/admin", label: "Kelola Order", icon: ShieldCheck },
-];
 
 export function DashboardShell({
   variant = "user",
@@ -31,8 +21,19 @@ export function DashboardShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { lang, t } = useLang();
   const isAdminArea = variant === "admin";
-  const nav = isAdminArea ? ADMIN_NAV : USER_NAV;
+
+  const nav: NavItem[] = isAdminArea
+    ? [
+        { href: "/", label: t.nav.home, icon: Home },
+        { href: "/admin", label: t.nav.admin, icon: ShieldCheck },
+      ]
+    : [
+        { href: "/", label: t.nav.home, icon: Home },
+        { href: "/dashboard", label: t.nav.dashboard, icon: LayoutDashboard },
+        { href: "/dashboard/pesan", label: t.nav.pesan, icon: PlusCircle },
+      ];
 
   const isActive = (href: string) => {
     if (href === "/") return false; // exit link, never highlighted
@@ -87,7 +88,7 @@ export function DashboardShell({
     <div className="min-h-screen bg-background">
       {/* Top navbar — same as home page, kept sticky */}
       <div className="sticky top-0 z-40">
-        <Navbar language="id" />
+        <Navbar language={lang} showLangToggle />
       </div>
 
       {/* Desktop sidebar (offset below the 53px navbar) */}
@@ -95,7 +96,7 @@ export function DashboardShell({
         {/* Area label */}
         <div className="flex items-center gap-2 px-4 pb-1 pt-4">
           <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-            {isAdminArea ? "Panel Admin" : "Dashboard"}
+            {isAdminArea ? t.nav.areaAdmin : t.nav.areaDashboard}
           </p>
           {isAdminArea && (
             <span className="rounded border border-accent/30 bg-accent/10 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-accent">

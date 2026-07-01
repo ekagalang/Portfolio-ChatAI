@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/db";
+import { getLang } from "@/lib/i18n.server";
+import { t } from "@/lib/i18n";
 import { PageHeader } from "@/components/dashboard/ui";
 import { ProfileForm } from "@/components/dashboard/ProfileForm";
 
@@ -22,9 +24,11 @@ export default async function ProfilePage() {
   });
   if (!user) notFound();
 
+  const tt = t(await getLang());
+
   return (
     <>
-      <PageHeader title="Profil" subtitle="Kelola informasi akun dan keamananmu." />
+      <PageHeader title={tt.profil.title} subtitle={tt.profil.subtitle} />
       <ProfileForm
         initialName={user.name ?? ""}
         email={user.email}

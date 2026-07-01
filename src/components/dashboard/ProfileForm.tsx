@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { Check, Loader2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { dateLocale } from "@/lib/i18n";
+import { useLang } from "@/components/LangProvider";
 import { Panel, SectionLabel, Row, btnPrimary } from "@/components/dashboard/ui";
 import { fieldCls, labelCls } from "@/components/auth/ui";
 
@@ -44,6 +46,8 @@ export function ProfileForm({
 }) {
   const router = useRouter();
   const { update } = useSession();
+  const { lang, t } = useLang();
+  const tp = t.profil;
 
   const [name, setName] = useState(initialName);
   const [nameSaving, setNameSaving] = useState(false);
@@ -70,14 +74,14 @@ export function ProfileForm({
       });
       const data = await res.json();
       if (!res.ok) {
-        setNameMsg({ ok: false, text: data.error ?? "Gagal menyimpan." });
+        setNameMsg({ ok: false, text: data.error ?? tp.saveFailed });
         return;
       }
-      setNameMsg({ ok: true, text: "Nama berhasil diperbarui." });
+      setNameMsg({ ok: true, text: tp.nameSaved });
       await update({ name }); // segarkan sesi → navbar ikut update
       router.refresh();
     } catch {
-      setNameMsg({ ok: false, text: "Koneksi gagal, coba lagi." });
+      setNameMsg({ ok: false, text: t.common.connError });
     } finally {
       setNameSaving(false);
     }
@@ -86,7 +90,7 @@ export function ProfileForm({
   const savePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPw !== confirmPw) {
-      setPwMsg({ ok: false, text: "Konfirmasi password tidak cocok." });
+      setPwMsg({ ok: false, text: tp.confirmMismatch });
       return;
     }
     setPwSaving(true);
@@ -103,18 +107,18 @@ export function ProfileForm({
       });
       const data = await res.json();
       if (!res.ok) {
-        setPwMsg({ ok: false, text: data.error ?? "Gagal menyimpan." });
+        setPwMsg({ ok: false, text: data.error ?? tp.saveFailed });
         return;
       }
       setPwMsg({
         ok: true,
-        text: hasPassword ? "Password berhasil diubah." : "Password berhasil diatur.",
+        text: hasPassword ? tp.passwordChanged : tp.passwordSet,
       });
       setCurPw("");
       setNewPw("");
       setConfirmPw("");
     } catch {
-      setPwMsg({ ok: false, text: "Koneksi gagal, coba lagi." });
+      setPwMsg({ ok: false, text: t.common.connError });
     } finally {
       setPwSaving(false);
     }
@@ -143,19 +147,19 @@ export function ProfileForm({
         </Panel>
 
         <Panel className="p-5">
-          <SectionLabel>Akun</SectionLabel>
+          <SectionLabel>{tp.account}</SectionLabel>
           <div className="divide-y divide-border">
-            <Row label="Email" value={email} />
+            <Row label={tp.email} value={email} />
             <Row
-              label="Member sejak"
-              value={new Date(memberSince).toLocaleDateString("id-ID", {
+              label={tp.memberSince}
+              value={new Date(memberSince).toLocaleDateString(dateLocale(lang), {
                 day: "numeric",
                 month: "short",
                 year: "numeric",
               })}
             />
-            <Row label="Total order" value={String(orderCount)} />
-            <Row label="Metode login" value={hasPassword ? "Email & password" : "Google"} />
+            <Row label={tp.totalOrder} value={String(orderCount)} />
+            <Row label={tp.loginMethod} value={hasPassword ? tp.emailPassword : tp.google} />
           </div>
         </Panel>
       </div>
@@ -164,16 +168,16 @@ export function ProfileForm({
       <div className="space-y-4 lg:col-span-3">
         {/* Nama */}
         <Panel className="p-5">
-          <SectionLabel>Ubah Nama</SectionLabel>
+          <SectionLabel>{tp.changeName}</SectionLabel>
           <form onSubmit={saveName} className="flex flex-col gap-3">
             <div>
-              <label className={labelCls}>Nama Lengkap</label>
+              <label className={labelCls}>{tp.fullName}</label>
               <input
                 className={fieldCls}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={nameSaving}
-                placeholder="Nama kamu"
+                placeholder={tp.namePlaceholder}
                 maxLength={80}
               />
             </div>
@@ -185,7 +189,7 @@ export function ProfileForm({
                 disabled={nameSaving || name.trim() === initialName.trim() || name.trim().length < 2}
               >
                 {nameSaving && <Loader2 className="size-3.5 animate-spin" />}
-                Simpan
+                {t.common.save}
               </button>
             </div>
           </form>
@@ -193,16 +197,16 @@ export function ProfileForm({
 
         {/* Password */}
         <Panel className="p-5">
-          <SectionLabel>{hasPassword ? "Ubah Password" : "Atur Password"}</SectionLabel>
+          <SectionLabel>{hasPassword ? tp.changePassword : tp.setPassword}</SectionLabel>
           {!hasPassword && (
             <p className="mb-3 rounded-lg border border-border bg-surface-2 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
-              Akunmu login via Google. Atur password agar bisa juga masuk dengan email & password.
+              {tp.googleNote}
             </p>
           )}
           <form onSubmit={savePassword} className="flex flex-col gap-3">
             {hasPassword && (
               <div>
-                <label className={labelCls}>Password Saat Ini</label>
+                <label className={labelCls}>{tp.currentPassword}</label>
                 <input
                   className={fieldCls}
                   type="password"
@@ -216,7 +220,7 @@ export function ProfileForm({
             )}
             <div>
               <label className={labelCls}>
-                Password Baru <span className="normal-case opacity-60">(min 8 karakter)</span>
+                {tp.newPassword} <span className="normal-case opacity-60">{tp.min8}</span>
               </label>
               <input
                 className={fieldCls}
@@ -230,7 +234,7 @@ export function ProfileForm({
               />
             </div>
             <div>
-              <label className={labelCls}>Konfirmasi Password Baru</label>
+              <label className={labelCls}>{tp.confirmNewPassword}</label>
               <input
                 className={fieldCls}
                 type="password"
@@ -250,7 +254,7 @@ export function ProfileForm({
                 disabled={pwSaving || newPw.length < 8 || confirmPw.length < 8}
               >
                 {pwSaving && <Loader2 className="size-3.5 animate-spin" />}
-                {hasPassword ? "Ubah Password" : "Atur Password"}
+                {hasPassword ? tp.changePassword : tp.setPassword}
               </button>
             </div>
           </form>

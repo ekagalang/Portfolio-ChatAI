@@ -4,6 +4,8 @@ import { requireUser } from "@/lib/session";
 import { services } from "@/data/services";
 import { profile } from "@/data/profile";
 import { formatIDR } from "@/lib/utils";
+import { getLang } from "@/lib/i18n.server";
+import { t } from "@/lib/i18n";
 import { PageHeader, Panel, btnPrimary, btnGhost } from "@/components/dashboard/ui";
 
 export const dynamic = "force-dynamic";
@@ -11,13 +13,11 @@ export const metadata = { title: "Pesan Jasa", robots: { index: false } };
 
 export default async function DashboardPesanPage() {
   await requireUser();
+  const tt = t(await getLang());
 
   return (
     <>
-      <PageHeader
-        title="Pesan Jasa"
-        subtitle="Pilih layanan yang kamu butuhkan. Setelah diskusi, saya kirim penawaran harga + DP."
-      />
+      <PageHeader title={tt.pesan.title} subtitle={tt.pesan.subtitle} />
 
       <div className="grid gap-4 sm:grid-cols-2">
         {services.map((s) => (
@@ -51,7 +51,7 @@ export default async function DashboardPesanPage() {
             <div className="mt-auto flex flex-wrap items-end justify-between gap-3 border-t border-border pt-4">
               <div>
                 <p className="font-mono text-sm font-semibold text-accent">
-                  Mulai {formatIDR(s.pricing.starting)}
+                  {tt.pesan.startFrom} {formatIDR(s.pricing.starting)}
                   <span className="text-[11px] font-normal text-muted-foreground">/{s.pricing.unit}</span>
                 </p>
                 <p className="mt-0.5 font-mono text-[10px] text-muted-foreground">⏱ {s.duration}</p>
@@ -63,10 +63,10 @@ export default async function DashboardPesanPage() {
                   rel="noopener noreferrer"
                   className={btnGhost}
                 >
-                  <MessageCircle className="size-3.5" /> Tanya
+                  <MessageCircle className="size-3.5" /> {tt.pesan.ask}
                 </a>
                 <Link href={`/order/new?service=${s.id}`} className={btnPrimary}>
-                  <CreditCard className="size-3.5" /> Pesan
+                  <CreditCard className="size-3.5" /> {tt.pesan.order}
                 </Link>
               </div>
             </div>

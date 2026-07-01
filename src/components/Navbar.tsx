@@ -3,16 +3,18 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Sun, Moon, Terminal, Download, Globe } from "lucide-react";
+import { Sun, Moon, Terminal, Download } from "lucide-react";
 import { useTheme } from "@/components/ThemeProvider";
 import { useIsMobile } from "@/hooks/useMediaQuery";
 import { AccountMenu } from "@/components/AccountMenu";
+import { LanguageToggle } from "@/components/LanguageToggle";
 import { profile } from "@/data/profile";
 
 interface Props {
   language: "id" | "en";
   onCVOpen?: () => void;
-  onLanguageToggle?: () => void;
+  /** Tampilkan toggle bahasa berbasis cookie (i18n global). */
+  showLangToggle?: boolean;
 }
 
 function ThemeToggle() {
@@ -40,7 +42,7 @@ function ThemeToggle() {
   );
 }
 
-export function Navbar({ language, onCVOpen, onLanguageToggle }: Props) {
+export function Navbar({ language, onCVOpen, showLangToggle }: Props) {
   const isMobile = useIsMobile();
 
   return (
@@ -88,44 +90,9 @@ export function Navbar({ language, onCVOpen, onLanguageToggle }: Props) {
         </div>
       </Link>
 
-      {/* Center — status (sembunyikan di mobile kecil) */}
       {/* Right actions */}
       <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
-        {/* Mobile: tampilkan CV & Language di navbar */}
-        {isMobile && onCVOpen && (
-          <button
-            onClick={onCVOpen}
-            style={{
-              display: "flex", alignItems: "center", gap: "5px",
-              padding: "5px 10px", borderRadius: "7px",
-              border: "1px solid hsl(var(--accent) / 0.3)",
-              background: "hsl(var(--accent) / 0.08)",
-              color: "hsl(var(--accent))",
-              fontSize: "11px", fontFamily: "var(--font-geist-mono)",
-              cursor: "pointer",
-              WebkitTapHighlightColor: "transparent",
-            }}
-          >
-            <Download size={12} />
-            CV
-          </button>
-        )}
-
-        {isMobile && onLanguageToggle && (
-          <button
-            onClick={onLanguageToggle}
-            style={{
-              width: "32px", height: "32px", borderRadius: "8px",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              background: "transparent", border: "none", cursor: "pointer",
-              color: "hsl(var(--muted-foreground))",
-              WebkitTapHighlightColor: "transparent",
-            }}
-          >
-            <Globe size={15} />
-          </button>
-        )}
-
+        {/* Status — desktop only */}
         {!isMobile && (
           <div style={{
             display: "flex", alignItems: "center", gap: "6px",
@@ -145,12 +112,35 @@ export function Navbar({ language, onCVOpen, onLanguageToggle }: Props) {
               fontFamily: "var(--font-geist-mono)",
             }}>
               {profile.available
-                ? (language === "id" ? "open to work" : "open to work")
+                ? "open to work"
                 : (language === "id" ? "tidak tersedia" : "unavailable")
               }
             </span>
           </div>
         )}
+
+        {/* Lihat CV */}
+        {onCVOpen && (
+          <button
+            onClick={onCVOpen}
+            title={language === "id" ? "Lihat CV" : "View CV"}
+            style={{
+              display: "flex", alignItems: "center", gap: "5px",
+              padding: "5px 10px", borderRadius: "7px",
+              border: "1px solid hsl(var(--accent) / 0.3)",
+              background: "hsl(var(--accent) / 0.08)",
+              color: "hsl(var(--accent))",
+              fontSize: "11px", fontFamily: "var(--font-geist-mono)",
+              cursor: "pointer",
+              WebkitTapHighlightColor: "transparent",
+            }}
+          >
+            <Download size={12} />
+            CV
+          </button>
+        )}
+
+        {showLangToggle && <LanguageToggle />}
 
         <ThemeToggle />
 
