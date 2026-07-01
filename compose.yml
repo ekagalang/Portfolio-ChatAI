@@ -14,10 +14,8 @@ services:
       NODE_ENV: production
       HOSTNAME: 0.0.0.0
       PORT: 3000
-      # SQLite di volume agar data persist antar restart/redeploy
-      DATABASE_URL: ${DATABASE_URL:-file:/app/data/prod.db}
-    volumes:
-      - app_data:/app/data
+      # DATABASE_URL (Postgres) + secret lain diambil dari .env.production.
+      # Untuk Postgres/Redis di jaringan Docker, lihat docs/SCALING.md.
     networks:
       - frontend
     healthcheck:
@@ -38,6 +36,3 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-
-volumes:
-  app_data:

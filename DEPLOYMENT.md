@@ -18,24 +18,33 @@ Di root project, copy `.env.example` menjadi `.env.production`, lalu isi nilainy
 cp .env.example .env.production
 ```
 
-Variable yang wajib diisi:
+Variable yang **wajib** diisi:
 
-- `GEMINI_API_KEY`
-- `GITHUB_USERNAME`
-- `RESEND_API_KEY`
-- `CONTACT_EMAIL`
-- `FROM_EMAIL`
+- `DATABASE_URL` — koneksi Postgres, mis. `postgresql://user:pass@host:5432/portfolio?schema=public` (lihat `docs/SCALING.md` untuk setup di VPS)
+- `AUTH_SECRET` — kunci sesi Auth.js, generate: `openssl rand -base64 32`
+- `NEXT_PUBLIC_APP_URL` — URL publik app (dipakai callback Midtrans), mis. `https://ekagalang.my.id`
+- `GEMINI_API_KEY` — Google Gemini (chatbot)
+- `GITHUB_USERNAME` — profil GitHub yang ditampilkan
+- `RESEND_API_KEY` — layanan email Resend
+- `CONTACT_EMAIL` — tujuan form kontak
+- `FROM_EMAIL` — alamat pengirim email
+- `MIDTRANS_SERVER_KEY` — pembayaran Midtrans (server)
+- `MIDTRANS_CLIENT_KEY` — pembayaran Midtrans (client/Snap)
 
-Variable opsional:
+Variable **opsional**:
 
-- `GITHUB_TOKEN`
-- `NEXT_PUBLIC_UMAMI_ID`
-- `NEXT_PUBLIC_UMAMI_URL`
+- `ADMIN_EMAILS` — daftar email admin (pisah koma). Email ini otomatis jadi admin & wajib login via Google
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — login Google (email/password tetap jalan tanpa ini)
+- `MIDTRANS_ENV` — `sandbox` (default) atau `production`
+- `REDIS_URL` — rate limiter multi-instance (default in-memory). Lihat `docs/SCALING.md`
+- `GITHUB_TOKEN` — naikkan rate limit API GitHub
+- `NEXT_PUBLIC_UMAMI_ID`, `NEXT_PUBLIC_UMAMI_URL` — analytics Umami
 
 Catatan:
 
 - `NEXT_PUBLIC_UMAMI_*` dibaca saat image dibuild. Karena itu jalankan Compose dengan `--env-file .env.production`.
 - Jika analytics Umami tidak dipakai, biarkan kosong.
+- Postgres & Redis: `compose.yml` mengambil `DATABASE_URL`/`REDIS_URL` dari `.env.production`. Agar container bisa menjangkau Postgres/Redis di jaringan Docker, ikuti `docs/SCALING.md` §4.
 
 ## 3. Install dependency server
 
@@ -111,13 +120,19 @@ Jalankan aplikasi:
 docker compose --env-file .env.production up -d --build
 ```
 
-Karena file `docker-compose.yml` memetakan port `3000:3000`, aplikasi akan tersedia di:
+Aplikasi berjalan di port `3000` **di dalam** container pada network `frontend`.
+`compose.yml` sengaja **tidak** mem-publish port ke host — desainnya berada di
+belakang reverse proxy (Nginx/Caddy) yang meneruskan ke container di network `frontend`.
 
-```text
-http://SERVER_IP:3000
+Untuk mengakses langsung (mis. saat pengetesan tanpa reverse proxy), tambahkan
+mapping port pada service `app_main` di `compose.yml`:
+
+```yaml
+    ports:
+      - "3000:3000"
 ```
 
-Jika port `3000` bentrok, ganti bagian kiri mapping port di `docker-compose.yml`.
+lalu aplikasi tersedia di `http://SERVER_IP:3000`.
 
 ## 6. Verifikasi hasil deploy
 
@@ -130,7 +145,7 @@ docker compose ps
 Lihat log aplikasi:
 
 ```bash
-docker compose logs -f app
+docker compose logs -f app_main
 ```
 
 Tes endpoint utama:
@@ -165,7 +180,7 @@ docker compose --env-file .env.production up -d --build
 Restart container:
 
 ```bash
-docker compose restart app
+docker compose restart app_main
 ```
 
 Stop aplikasi:
