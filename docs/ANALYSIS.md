@@ -102,7 +102,10 @@ pembayaran (idempotency/verifikasi nominal), dan quality gates (test/CI).
 > streaming asli, timeout Gemini, emailVerified (soft badge), pin next-auth,
 > index & cascade. 🟢 **P2**: #13 Invoice PDF ✅ · #14 Termin cicilan pelunasan ✅
 > · #15 Tiket revisi/komplain/refund ✅ · #17 Audit log global `/admin/audit` ✅.
-> #16 (notif WhatsApp) **ditunda** (butuh provider berbayar). Tersisa P3 (polish).
+> #16 (notif WhatsApp) **ditunda** (butuh provider berbayar). 🔵 **P3**: #18 sitemap
+> multi-URL ✅ · #19 `next/image` ✅ · #20 DEPLOYMENT.md + compose Postgres ✅ ·
+> #21 masking error ✅ · #22 Prettier ✅. **Semua item roadmap selesai** kecuali
+> #16 (WhatsApp, menunggu pilihan provider).
 
 ### 🔴 P0 — Correctness & keamanan (dulu; menyangkut uang & data)
 1. Idempotency webhook **atomic** — `updateMany({ where: { midtransOrderId, paidAt: null }, ... })`
