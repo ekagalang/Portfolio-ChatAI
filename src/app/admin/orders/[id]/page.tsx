@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, FileText } from "lucide-react";
 import { requireAdmin } from "@/lib/session";
 import { getOrderById } from "@/lib/orders";
 import { formatIDR, orderLabel } from "@/lib/utils";
@@ -62,6 +62,12 @@ export default async function AdminOrderDetail({ params }: { params: Promise<{ i
                 <Row label={tt.common.dp} value={formatIDR(dp)} />
                 <Row label={tt.admin.remaining} value={formatIDR(Math.max(0, total - dp))} />
               </div>
+              <a
+                href={`/api/orders/${order.id}/invoice`}
+                className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 py-2.5 font-mono text-xs text-muted-foreground transition hover:border-accent/40 hover:text-foreground"
+              >
+                <FileText className="size-4" /> {tt.invoice.download}
+              </a>
             </Panel>
           )}
 

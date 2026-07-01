@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft, MessageCircle } from "lucide-react";
+import { ChevronLeft, MessageCircle, FileText } from "lucide-react";
 import { requireUser } from "@/lib/session";
 import { getOrderForUser } from "@/lib/orders";
 import { formatIDR, cn, orderLabel } from "@/lib/utils";
@@ -144,6 +144,15 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
                 ))}
               </div>
             </Panel>
+          )}
+
+          {order.agreedTotal != null && (
+            <a
+              href={`/api/orders/${order.id}/invoice`}
+              className="flex items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 py-3 font-mono text-xs text-muted-foreground transition hover:border-accent/40 hover:text-foreground"
+            >
+              <FileText className="size-4" /> {tt.invoice.download}
+            </a>
           )}
 
           <a
