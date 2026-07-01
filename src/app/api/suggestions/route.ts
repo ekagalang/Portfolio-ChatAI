@@ -5,7 +5,7 @@ import { rateLimit, clientIp } from "@/lib/rate-limit";
 export async function POST(req: NextRequest) {
   try {
     // Endpoint ini memanggil Gemini (berbayar) → batasi agar tak diabuse.
-    const rl = rateLimit(`suggestions:${clientIp(req)}`, 15, 60_000);
+    const rl = await rateLimit(`suggestions:${clientIp(req)}`, 15, 60_000);
     if (!rl.ok) {
       return NextResponse.json({ suggestions: [] }, { status: 429 });
     }

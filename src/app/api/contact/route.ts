@@ -19,7 +19,7 @@ function esc(s: string): string {
 export async function POST(req: NextRequest) {
   try {
     // ── Rate limit: 3 pesan / 10 menit per IP ──
-    const rl = rateLimit(`contact:${clientIp(req)}`, 3, 10 * 60 * 1000);
+    const rl = await rateLimit(`contact:${clientIp(req)}`, 3, 10 * 60 * 1000);
     if (!rl.ok) {
       return tooMany(rl.retryAfterSec, "Terlalu banyak pesan. Coba lagi dalam 10 menit.");
     }

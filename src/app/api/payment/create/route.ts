@@ -2,27 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { createSnapTransaction } from "@/lib/midtrans";
 import { getOrderForUser, createPaymentRecord } from "@/lib/orders";
-
-// Rate limit sederhana: max 5 request per menit per user
-const rateLimitMap = new Map<string, { count: number; reset: number }>();
-function checkRateLimit(key: string): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(key);
-  if (!entry || now > entry.reset) {
-    rateLimitMap.set(key, { count: 1, reset: now + 60_000 });
-    return true;
-  }
-  if (entry.count >= 5) return false;
-  entry.count++;
-  return true;
-}
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Harus login" }, { status: 401 });
   }
-  if (!checkRateLimit(session.user.id)) {
+  // Rate limit terpusat: max 5 request per menit per user
+  const rl = await rateLimit(`payment:${session.user.id}`, 5, 60_000);
+  if (!rl.ok) {
     return NextResponse.json({ error: "Terlalu banyak permintaan" }, { status: 429 });
   }
 

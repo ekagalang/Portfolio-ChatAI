@@ -31,7 +31,7 @@ function buildChatHistory(history: ChatHistory[], systemPrompt: string): ChatHis
 export async function POST(req: NextRequest) {
   try {
     // ─── Rate Limiting ───
-    const rl = rateLimit(`chat:${clientIp(req)}`, 20, 60_000);
+    const rl = await rateLimit(`chat:${clientIp(req)}`, 20, 60_000);
     if (!rl.ok) {
       return tooMany(rl.retryAfterSec, "Terlalu banyak request. Coba lagi dalam 1 menit.");
     }

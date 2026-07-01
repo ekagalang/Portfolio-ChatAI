@@ -12,7 +12,7 @@ export async function POST() {
   }
 
   // Batasi agar tidak dipakai spam kirim email — 3 per jam per user.
-  const rl = rateLimit(`resend-verify:${session.user.id}`, 3, 60 * 60 * 1000);
+  const rl = await rateLimit(`resend-verify:${session.user.id}`, 3, 60 * 60 * 1000);
   if (!rl.ok) {
     return NextResponse.json({ error: "Terlalu sering. Coba lagi nanti." }, { status: 429 });
   }

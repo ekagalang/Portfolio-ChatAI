@@ -3,31 +3,32 @@ import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 const uniq = () => "k:" + Math.random().toString(36).slice(2);
 
-describe("rateLimit", () => {
-  it("mengizinkan sampai limit lalu menolak", () => {
+// Tanpa REDIS_URL di env test → rateLimit memakai backend in-memory.
+describe("rateLimit (in-memory)", () => {
+  it("mengizinkan sampai limit lalu menolak", async () => {
     const key = uniq();
-    for (let i = 0; i < 3; i++) expect(rateLimit(key, 3, 60_000).ok).toBe(true);
-    const blocked = rateLimit(key, 3, 60_000);
+    for (let i = 0; i < 3; i++) expect((await rateLimit(key, 3, 60_000)).ok).toBe(true);
+    const blocked = await rateLimit(key, 3, 60_000);
     expect(blocked.ok).toBe(false);
     expect(blocked.retryAfterSec).toBeGreaterThan(0);
   });
 
-  it("key berbeda punya bucket terpisah", () => {
+  it("key berbeda punya bucket terpisah", async () => {
     const a = uniq();
     const b = uniq();
-    expect(rateLimit(a, 1, 60_000).ok).toBe(true);
-    expect(rateLimit(a, 1, 60_000).ok).toBe(false);
-    expect(rateLimit(b, 1, 60_000).ok).toBe(true);
+    expect((await rateLimit(a, 1, 60_000)).ok).toBe(true);
+    expect((await rateLimit(a, 1, 60_000)).ok).toBe(false);
+    expect((await rateLimit(b, 1, 60_000)).ok).toBe(true);
   });
 
-  it("reset setelah window lewat", () => {
+  it("reset setelah window lewat", async () => {
     vi.useFakeTimers();
     try {
       const key = uniq();
-      expect(rateLimit(key, 1, 1000).ok).toBe(true);
-      expect(rateLimit(key, 1, 1000).ok).toBe(false);
+      expect((await rateLimit(key, 1, 1000)).ok).toBe(true);
+      expect((await rateLimit(key, 1, 1000)).ok).toBe(false);
       vi.advanceTimersByTime(1001);
-      expect(rateLimit(key, 1, 1000).ok).toBe(true);
+      expect((await rateLimit(key, 1, 1000)).ok).toBe(true);
     } finally {
       vi.useRealTimers();
     }
