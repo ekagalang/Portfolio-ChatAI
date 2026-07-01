@@ -104,7 +104,9 @@ model VerificationToken {
 model Order {
   id           String   @id @default(cuid())
   orderNumber  Int?     @unique // nomor urut rapi untuk ditampilkan (#0001)
-  user         User     @relation(fields: [userId], references: [id])
+  // Restrict eksplisit: user berorder tak bisa dihapus (kebijakan "bekukan,
+  // jangan hapus"). Ini juga default Prisma untuk relasi wajib — dibuat jelas.
+  user         User     @relation(fields: [userId], references: [id], onDelete: Restrict)
   userId       String
 
   serviceId    String
