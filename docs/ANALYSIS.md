@@ -96,6 +96,12 @@ pembayaran (idempotency/verifikasi nominal), dan quality gates (test/CI).
 
 ## 3. Saran pengembangan (diprioritaskan)
 
+> **Status per 2026-07-01:** 🔴 P0 (#1–5) **selesai**. 🟠 P1 (#6–12) **selesai**
+> kecuali **Playwright E2E** (bagian dari #6) yang masih tersisa. CodeQL, Dependabot,
+> Vitest+CI, security headers, Postgres+Redis, streaming asli, timeout Gemini,
+> emailVerified (soft badge), pin next-auth, index & cascade — semua ✅.
+> Berikutnya: **Playwright E2E** lalu 🟢 **P2** (mulai Invoice PDF).
+
 ### 🔴 P0 — Correctness & keamanan (dulu; menyangkut uang & data)
 1. Idempotency webhook **atomic** — `updateMany({ where: { midtransOrderId, paidAt: null }, ... })`
    lalu cek affected count.
