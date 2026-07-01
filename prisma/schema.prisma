@@ -1,5 +1,5 @@
 // Prisma schema — auth (Auth.js) + order & pembayaran
-// SQLite untuk single-instance. Upgrade ke Postgres dengan ganti provider + DATABASE_URL.
+// Postgres (lihat docs/SCALING.md). Dev: Postgres lokal via Docker (port 5433).
 
 generator client {
   provider      = "prisma-client-js"
@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
