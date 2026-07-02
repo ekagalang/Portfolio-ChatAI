@@ -33,9 +33,9 @@ jobs:
 
       # Portfolio = service `app_main` di project `dck` (monolith /home/a/dck
       # meng-include main/compose.yml). Build image (container lama tetap
-      # melayani) lalu recreate HANYA app_main. Migrasi Postgres jalan otomatis
-      # via CMD Dockerfile saat container start.
-      - name: Build & deploy (service app_main)
+      # melayani), jalankan migrasi via stage `migrator` (deps penuh), lalu
+      # recreate HANYA app_main.
+      - name: Build image
         working-directory: /home/a/dck
         run: |
           # NEXT_PUBLIC_* di-inline saat build → export dari .env.production
@@ -43,7 +43,17 @@ jobs:
             v=$(grep -E "^${k}=" main/.env.production | head -1 | cut -d= -f2- || true)
             export "${k}=${v}"
           done
-          docker compose up -d --build app_main
+          docker compose build app_main
+
+      - name: Migrate Postgres (stage migrator, jaringan dck_backend)
+        run: |
+          docker build --target migrator -t pf_migrate /home/a/dck/main
+          docker run --rm --network dck_backend --env-file /home/a/dck/main/.env.production \
+            pf_migrate npx prisma migrate deploy
+
+      - name: Recreate app_main
+        working-directory: /home/a/dck
+        run: docker compose up -d app_main
 
       - name: Tunggu container healthy
         run: |

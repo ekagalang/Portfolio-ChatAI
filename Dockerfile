@@ -11,6 +11,14 @@ FROM base AS deps
 COPY package.json package-lock.json ./
 RUN npm ci
 
+# Stage untuk `prisma migrate deploy` — punya node_modules penuh (CLI prisma +
+# transitive deps spt effect/c12) + skema. Dipakai one-off saat deploy, bukan
+# di runtime yang ramping. Cepat dibangun (hanya copy, tanpa next build).
+FROM base AS migrator
+COPY --from=deps /app/node_modules ./node_modules
+COPY prisma ./prisma
+COPY package.json ./
+
 FROM base AS builder
 
 ARG NEXT_PUBLIC_UMAMI_ID
@@ -54,5 +62,6 @@ USER nextjs
 
 EXPOSE 3000
 
-# Terapkan migrasi lalu jalankan server
-CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && node server.js"]
+# Migrasi dijalankan sebagai langkah deploy terpisah (stage `migrator`),
+# bukan di sini — runtime ramping tak punya semua dep CLI prisma.
+CMD ["node", "server.js"]
