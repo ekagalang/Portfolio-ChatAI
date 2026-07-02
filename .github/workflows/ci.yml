@@ -15,7 +15,7 @@ jobs:
       AUTH_SECRET: "ci-dummy-secret-not-for-production-32chars"
       NEXT_PUBLIC_APP_URL: "http://localhost:3000"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v6
         with:
