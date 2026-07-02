@@ -11,8 +11,16 @@ updates:
         update-types:
           - minor
           - patch
+    ignore:
+      # Jangan buka PR untuk bump MAJOR (berpotensi breaking; upgrade manual
+      # saat siap, mis. Prisma 7, TypeScript 6, ESLint 10).
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]

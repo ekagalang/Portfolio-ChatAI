@@ -2,6 +2,11 @@ name: CI
 
 on:
   push:
+    # Perubahan dokumen/konfigurasi non-app tidak perlu memicu CI+deploy.
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".github/dependabot.yml"
   pull_request:
 
 jobs:
