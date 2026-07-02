@@ -7,6 +7,7 @@ on:
       - "**.md"
       - "docs/**"
       - ".github/dependabot.yml"
+      - ".env.example"
   pull_request:
 
 jobs:

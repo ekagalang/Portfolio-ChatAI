@@ -73,6 +73,7 @@ Wajib:
 ```
 DATABASE_URL=postgresql://portfolio:<PASS>@postgres_docker:5432/portfolio?schema=public
 AUTH_SECRET=<openssl rand -base64 32>
+AUTH_URL=https://ekagalang.my.id        # WAJIB di belakang proxy (kalau tidak, callback OAuth = 0.0.0.0:3000)
 NEXT_PUBLIC_APP_URL=https://ekagalang.my.id
 GEMINI_API_KEY=...
 GITHUB_USERNAME=ekagalang
