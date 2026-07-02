@@ -25,7 +25,9 @@ services:
       - frontend
       - backend
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      # 127.0.0.1 (bukan localhost) — localhost resolve ke IPv6 ::1 di container,
+      # sedangkan server listen di IPv4 0.0.0.0 → wget refused → unhealthy palsu.
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:3000/"]
       interval: 30s
       timeout: 10s
       retries: 3
