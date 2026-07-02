@@ -70,3 +70,9 @@ jobs:
       # Reload nginx agar re-resolve IP container baru (proxy_pass statis).
       - name: Reload nginx
         run: docker exec nginx_utama nginx -s reload
+
+      # Bersihkan image dangling lama (image app versi sebelumnya jadi dangling
+      # tiap deploy). Filter >24h agar tak mengganggu deploy app lain yang
+      # sedang berjalan di VPS bersama.
+      - name: Prune dangling images (>24h)
+        run: docker image prune -f --filter "until=24h" || true
